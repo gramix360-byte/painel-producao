@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0b2a4a" />
+  <meta name="theme-color" content="#404040" />
   <meta name="description" content="Sistema offline-first para cadastro e acompanhamento de pedidos de produção." />
   <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  <link rel="icon" href="./logo.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="./styles.css" />
   <title>Painel de Produção</title>
 </head>
@@ -14,7 +14,7 @@
   <div id="app">
     <aside class="sidebar">
       <div class="brand">
-        <div class="brand-mark">PP</div>
+        <div class="brand-mark"><img src="./logo.svg" alt="Logo" style="width:36px;height:36px;object-fit:contain" /></div>
         <div><strong>Painel de Produção</strong><small>Brindes personalizados</small></div>
       </div>
       <nav id="nav">
@@ -25,50 +25,13 @@
         <button class="nav-item" data-view="sync">Sincronização</button>
       </nav>
     </aside>
-
     <main class="main">
-      <header class="topbar">
-        <div>
-          <h1 id="page-title">Dashboard</h1>
-          <p id="page-subtitle">Visão geral da produção</p>
-        </div>
-        <div class="connection-wrap">
-          <span id="connection-badge" class="connection online">Online</span>
-          <span id="pending-badge" class="pending-badge hidden">0 pendentes</span>
-        </div>
-      </header>
-
-      <div id="offline-banner" class="offline-banner hidden">
-        Você está offline. Pode continuar trabalhando normalmente. As alterações serão sincronizadas quando a internet voltar.
-      </div>
-
+      <header class="topbar"><div><h1 id="page-title">Dashboard</h1><p id="page-subtitle">Visão geral da produção</p></div><div class="connection-wrap"><span id="connection-badge" class="connection online">Online</span><span id="pending-badge" class="pending-badge hidden">0 pendentes</span></div></header>
+      <div id="offline-banner" class="offline-banner hidden">Você está offline. Pode continuar trabalhando normalmente. As alterações serão sincronizadas quando a internet voltar.</div>
       <section id="view-dashboard" class="view active"></section>
-
-      <section id="view-novo" class="view">
-        <form id="order-form" class="form-card">
-          <div class="section-head"><h2>Novo pedido</h2><span>Cadastre o que precisa entrar na produção</span></div>
-          <div class="form-grid">
-            <label>Número do pedido<input id="order-number" required placeholder="Ex.: 20394" /></label>
-            <label>Cliente<input id="customer-name" required placeholder="Nome do cliente" /></label>
-            <label>Prazo<input id="due-date" type="date" /></label>
-            <label>Prioridade<select id="priority"><option value="normal">Normal</option><option value="urgente">Urgente</option></select></label>
-          </div>
-          <label>Observações<textarea id="notes" rows="3" placeholder="Informações importantes para a produção"></textarea></label>
-
-          <div class="items-head"><h3>Itens do pedido</h3><button type="button" id="add-item" class="button secondary">+ Adicionar item</button></div>
-          <div id="items-list"></div>
-
-          <div class="form-actions"><button type="submit" class="button primary">Cadastrar pedido</button></div>
-        </form>
-      </section>
-
-      <section id="view-producao" class="view"></section>
-      <section id="view-pedidos" class="view"></section>
-      <section id="view-sync" class="view"></section>
+      <section id="view-novo" class="view"><form id="order-form" class="form-card"><div class="section-head"><h2>Novo pedido</h2><span>Cadastre o que precisa entrar na produção</span></div><div class="form-grid"><label>Número do pedido<input id="order-number" required placeholder="Ex.: 20394" /></label><label>Cliente<input id="customer-name" required placeholder="Nome do cliente" /></label><label>Prazo<input id="due-date" type="date" /></label><label>Prioridade<select id="priority"><option value="normal">Normal</option><option value="urgente">Urgente</option></select></label></div><label>Observações<textarea id="notes" rows="3" placeholder="Informações importantes para a produção"></textarea></label><div class="items-head"><h3>Itens do pedido</h3><button type="button" id="add-item" class="button secondary">+ Adicionar item</button></div><div id="items-list"></div><div class="form-actions"><button type="submit" class="button primary">Cadastrar pedido</button></div></form></section>
+      <section id="view-producao" class="view"></section><section id="view-pedidos" class="view"></section><section id="view-sync" class="view"></section>
     </main>
   </div>
-
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./app.js"></script>
-</body>
-</html>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div><script type="module" src="./app.js"></script>
+</body></html>
