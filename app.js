@@ -36,21 +36,6 @@ function getOne(name,key){ return reqPromise(store(name).get(key)); }
 function put(name,value){ return reqPromise(store(name,'readwrite').put(value)); }
 function del(name,key){ return reqPromise(store(name,'readwrite').delete(key)); }
 
-async function seedDemo(){
-  const orders=await getAll('orders');
-  if(orders.length) return;
-  const demo={
-    id:uid(),order_number:'20394',customer_name:'Cliente Exemplo',due_date:'',priority:'normal',notes:'',status:'aguardando',
-    created_at:nowIso(),updated_at:nowIso(),started_at:null,finished_at:null,
-    items:[
-      {id:uid(),quantity:10,product_name:'Chaveiro MDF',personalization:'Logo do cliente'},
-      {id:uid(),quantity:20,product_name:'Chaveiro abridor de garrafa',personalization:'Logo do cliente'},
-      {id:uid(),quantity:10,product_name:'Agendas',personalization:'Capa personalizada'}
-    ]
-  };
-  await saveLocal(demo,true);
-}
-
 async function saveLocal(order,queue=true){
   order.updated_at=nowIso();
   await put('orders',order);
@@ -73,7 +58,18 @@ function apiHeaders(extra={}){
   return {apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json',...extra};
 }
 
+async function nextOrderNumber(){
+  const r=await fetch(`${SUPABASE_URL}/rest/v1/rpc/next_order_number`,{method:'POST',headers:apiHeaders(),body:'{}'});
+  if(!r.ok) throw new Error(`Numeração: ${await r.text()}`);
+  return await r.json();
+}
+
 async function remotePushOrder(order){
+  if(String(order.order_number).startsWith('OFF-')){
+    order.order_number=await nextOrderNumber();
+    order.updated_at=nowIso();
+    await put('orders',order);
+  }
   const orderPayload={
     id:order.id,order_number:order.order_number,customer_name:order.customer_name,due_date:order.due_date||null,
     priority:order.priority,notes:order.notes||'',status:order.status,created_at:order.created_at,updated_at:order.updated_at,
@@ -137,7 +133,7 @@ async function syncNow(manual=false){
 
 function formatDate(v){ if(!v) return 'Sem prazo'; const [y,m,d]=v.split('-'); return `${d}/${m}/${y}`; }
 function statusLabel(v){ return ({aguardando:'Aguardando',em_producao:'Em produção',finalizado:'Finalizado'})[v]||v; }
-function escapeHtml(v=''){ return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+function escapeHtml(v=''){ return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt',"'":'&#39;','"':'&quot;'}[c])); }
 
 async function updateConnection(){
   const badge=$('#connection-badge');
@@ -244,16 +240,20 @@ function addItemRow(data={}){
 
 async function createOrderFromForm(e){
   e.preventDefault();
-  const orderNumber=$('#order-number').value.trim();
-  const existing=(await getAll('orders')).find(o=>o.order_number===orderNumber);
-  if(existing){toast('Já existe um pedido com esse número.');return;}
   const items=$$('#items-list .item-row').map(row=>({id:uid(),quantity:Number(row.querySelector('.item-qty').value),product_name:row.querySelector('.item-product').value.trim(),personalization:row.querySelector('.item-personalization').value.trim()})).filter(i=>i.quantity>0&&i.product_name);
   if(!items.length){toast('Adicione pelo menos um item.');return;}
+  let orderNumber;
+  try{
+    orderNumber=navigator.onLine?await nextOrderNumber():`OFF-${Date.now().toString().slice(-6)}`;
+  }catch(err){
+    console.error(err);toast('Não foi possível gerar o número do pedido. Tente novamente.');return;
+  }
   const t=nowIso();
   const order={id:uid(),order_number:orderNumber,customer_name:$('#customer-name').value.trim(),due_date:$('#due-date').value,priority:$('#priority').value,notes:$('#notes').value.trim(),status:'aguardando',created_at:t,updated_at:t,started_at:null,finished_at:null,items};
   await saveLocal(order,true);
+  const generated=orderNumber.startsWith('OFF-')?'número será gerado quando sincronizar':`pedido #${orderNumber}`;
   e.target.reset();$('#items-list').innerHTML='';addItemRow();
-  toast(navigator.onLine?'Pedido cadastrado. Sincronizando...':'Pedido salvo neste dispositivo. Será sincronizado quando houver internet.');
+  toast(navigator.onLine?`Cadastrado ${generated}. Sincronizando...`:`Pedido salvo offline; o ${generated}.`);
   switchView('producao');
   if(navigator.onLine) syncNow();
 }
@@ -270,7 +270,6 @@ function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('sh
 
 async function init(){
   db=await openDB();
-  await seedDemo();
   addItemRow();
   $$('.nav-item').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.view)));
   $('#add-item').addEventListener('click',()=>addItemRow());
