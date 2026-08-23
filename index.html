@@ -13,6 +13,7 @@
   <link rel="apple-touch-icon" href="./icon.svg" />
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./pwa.css" />
+  <link rel="stylesheet" href="./phases.css" />
   <title>B de Brindes Produção</title>
 </head>
 <body style="visibility:hidden">
@@ -25,6 +26,7 @@
       <nav id="nav">
         <button class="nav-item active" data-view="dashboard">Dashboard</button>
         <button class="nav-item" data-view="novo">Novo Pedido</button>
+        <button id="phases-nav" class="phase-nav-btn" type="button">Fases</button>
         <button class="nav-item" data-view="producao">Produção</button>
         <button class="nav-item" data-view="pedidos">Pedidos</button>
         <button class="nav-item" data-view="sync">Sincronização</button>
@@ -35,6 +37,7 @@
       <div id="offline-banner" class="offline-banner hidden">Você está offline. Pode continuar trabalhando normalmente. As alterações serão sincronizadas quando a internet voltar.</div>
       <section id="view-dashboard" class="view active"></section>
       <section id="view-novo" class="view"><form id="order-form" class="form-card"><div class="section-head"><h2>Novo pedido</h2><span>O número será gerado automaticamente</span></div><div class="form-grid"><label>Número do pedido<input id="order-number" value="Automático (#0001, #0002...)" readonly disabled /></label><label>Cliente<input id="customer-name" required placeholder="Nome do cliente" /></label><label>Prazo<input id="due-date" type="date" /></label><label>Prioridade<select id="priority"><option value="normal">Normal</option><option value="urgente">Urgente</option></select></label></div><label>Observações<textarea id="notes" rows="3" placeholder="Informações importantes para a produção"></textarea></label><div class="items-head"><h3>Itens do pedido</h3><button type="button" id="add-item" class="button secondary">+ Adicionar item</button></div><div id="items-list"></div><div class="form-actions"><button type="submit" class="button primary">Cadastrar pedido</button></div></form></section>
+      <section id="view-fases" class="view"></section>
       <section id="view-producao" class="view"></section><section id="view-pedidos" class="view"></section><section id="view-sync" class="view"></section>
     </main>
   </div>
@@ -46,5 +49,6 @@
   <script src="./print-helper.js"></script>
   <script src="./email-notifier.js"></script>
   <script src="./pwa-install.js"></script>
+  <script src="./phases.js"></script>
   <script type="module" src="./app.js"></script>
 </body></html>
