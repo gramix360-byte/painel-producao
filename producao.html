@@ -1,13 +1,14 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="theme-color" content="#081f36">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="theme-color" content="#404040">
 <title>Produção | Painel de Produção</title>
-<link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="stylesheet" href="./styles.css">
+<link rel="icon" href="./logo.svg" type="image/svg+xml"><link rel="stylesheet" href="./styles.css">
 </head>
-<body class="tv-body">
-<header class="tv-header"><div><div class="tv-brand">PAINEL DE PRODUÇÃO</div><div id="tv-clock" class="tv-clock"></div></div><div class="tv-header-right"><span id="tv-status" class="connection online">Online</span><button id="tv-fullscreen" class="button secondary">Tela cheia</button></div></header>
+<body class="tv-body" style="visibility:hidden">
+<header class="tv-header"><div><div class="tv-brand">PAINEL DE PRODUÇÃO</div><div id="tv-clock" class="tv-clock"></div></div><div class="tv-header-right"><span id="tv-status" class="connection online">Online</span><button id="tv-fullscreen" class="button secondary">Tela cheia</button><button id="tv-logout" class="button secondary">Sair</button></div></header>
 <main class="tv-main"><section><div class="tv-column-head waiting"><h1>AGUARDANDO</h1><strong id="waiting-count">0</strong></div><div id="tv-waiting" class="tv-orders"></div></section><section><div class="tv-column-head doing"><h1>EM PRODUÇÃO</h1><strong id="doing-count">0</strong></div><div id="tv-doing" class="tv-orders"></div></section></main>
 <div id="tv-toast" class="tv-new-order">NOVO PEDIDO RECEBIDO</div>
+<script src="./auth-client.js"></script><script>window.PPAuth.requireAuth().then(s=>{if(s){document.body.style.visibility='visible';document.getElementById('tv-logout').addEventListener('click',()=>window.PPAuth.logout())}})</script>
 <script type="module" src="./producao.js"></script>
 </body></html>
