@@ -2,13 +2,18 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#404040" />
-  <meta name="description" content="Sistema offline-first para cadastro e acompanhamento de pedidos de produção." />
+  <meta name="description" content="Sistema de pedidos e produção da B de Brindes." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="B de Brindes" />
   <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="icon" href="./logo.svg" type="image/svg+xml" />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./icon.svg" />
   <link rel="stylesheet" href="./styles.css" />
-  <title>Painel de Produção</title>
+  <link rel="stylesheet" href="./pwa.css" />
+  <title>B de Brindes Produção</title>
 </head>
 <body style="visibility:hidden">
   <div id="app">
@@ -26,18 +31,20 @@
       </nav>
     </aside>
     <main class="main">
-      <header class="topbar"><div><h1 id="page-title">Dashboard</h1><p id="page-subtitle">Visão geral da produção</p></div><div class="connection-wrap"><span id="connection-badge" class="connection online">Online</span><span id="pending-badge" class="pending-badge hidden">0 pendentes</span><button id="logout-button" class="button secondary" type="button">Sair</button></div></header>
+      <header class="topbar"><div><h1 id="page-title">Dashboard</h1><p id="page-subtitle">Visão geral da produção</p></div><div class="connection-wrap"><button id="install-app" class="install-app" type="button">Instalar app</button><span id="connection-badge" class="connection online">Online</span><span id="pending-badge" class="pending-badge hidden">0 pendentes</span><button id="logout-button" class="button secondary" type="button">Sair</button></div></header>
       <div id="offline-banner" class="offline-banner hidden">Você está offline. Pode continuar trabalhando normalmente. As alterações serão sincronizadas quando a internet voltar.</div>
       <section id="view-dashboard" class="view active"></section>
       <section id="view-novo" class="view"><form id="order-form" class="form-card"><div class="section-head"><h2>Novo pedido</h2><span>O número será gerado automaticamente</span></div><div class="form-grid"><label>Número do pedido<input id="order-number" value="Automático (#0001, #0002...)" readonly disabled /></label><label>Cliente<input id="customer-name" required placeholder="Nome do cliente" /></label><label>Prazo<input id="due-date" type="date" /></label><label>Prioridade<select id="priority"><option value="normal">Normal</option><option value="urgente">Urgente</option></select></label></div><label>Observações<textarea id="notes" rows="3" placeholder="Informações importantes para a produção"></textarea></label><div class="items-head"><h3>Itens do pedido</h3><button type="button" id="add-item" class="button secondary">+ Adicionar item</button></div><div id="items-list"></div><div class="form-actions"><button type="submit" class="button primary">Cadastrar pedido</button></div></form></section>
       <section id="view-producao" class="view"></section><section id="view-pedidos" class="view"></section><section id="view-sync" class="view"></section>
     </main>
   </div>
+  <div id="ios-install-tip" class="ios-install-tip"><button id="ios-install-close" type="button">×</button><strong>Instalar no iPhone</strong>No Safari, toque em Compartilhar e depois em <b>Adicionar à Tela de Início</b>.</div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="./auth-client.js"></script>
   <script>window.PPAuth.requireAuth().then(s=>{if(s){document.body.style.visibility='visible';document.getElementById('logout-button').addEventListener('click',()=>window.PPAuth.logout())}})</script>
   <script src="./production-launcher.js"></script>
   <script src="./print-helper.js"></script>
   <script src="./email-notifier.js"></script>
+  <script src="./pwa-install.js"></script>
   <script type="module" src="./app.js"></script>
 </body></html>
