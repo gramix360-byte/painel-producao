@@ -1,3 +1,5 @@
-#view-producao .production-columns{grid-template-columns:1fr}
-#view-producao .production-columns>div:first-child{display:none}
-#view-producao .production-columns>div:last-child{max-width:1100px;width:100%}
+#view-producao .production-columns{grid-template-columns:1fr 1fr;gap:20px}
+#view-producao .production-columns>div:first-child{display:block}
+#view-producao .production-columns>div:last-child{max-width:none;width:100%}
+#view-producao .approval-note{margin-top:12px;padding:10px 12px;border-radius:10px;background:#fff3cd;font-weight:700}
+@media(max-width:900px){#view-producao .production-columns{grid-template-columns:1fr}}
