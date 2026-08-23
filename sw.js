@@ -1,5 +1,5 @@
-const CACHE='painel-producao-v9';
-const SHELL=['./','./index.html','./styles.css','./pwa.css','./pwa-install.js','./app.js','./manifest.webmanifest','./logo.svg','./icon.svg','./producao.html','./producao.js','./login.html','./login.css','./login.js','./auth-client.js','./production-launcher.js','./print-helper.js','./email-notifier.js','./ficha.html','./ficha.css','./ficha.js'];
+const CACHE='painel-producao-v10';
+const SHELL=['./','./index.html','./styles.css','./pwa.css','./pwa-install.js','./phases.css','./phases.js','./app.js','./manifest.webmanifest','./logo.svg','./icon.svg','./producao.html','./producao.js','./login.html','./login.css','./login.js','./auth-client.js','./production-launcher.js','./print-helper.js','./email-notifier.js','./ficha.html','./ficha.css','./ficha.js'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',event=>{
