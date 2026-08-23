@@ -30,7 +30,13 @@
     return r.json();
   }
 
-  async function updateLocal(orderId,phase){
+  function statusForPhase(phase){
+    if(phase==='em_producao') return 'em_producao';
+    if(['finalizado','embalagem','pronto_entrega','entregue'].includes(phase)) return 'finalizado';
+    return 'aguardando';
+  }
+
+  async function updateLocal(orderId,phase,status){
     try{
       const req=indexedDB.open('painel-producao-db',1);
       await new Promise((resolve,reject)=>{req.onsuccess=resolve;req.onerror=()=>reject(req.error)});
@@ -39,7 +45,15 @@
       const st=tx.objectStore('orders');
       const get=st.get(orderId);
       await new Promise((resolve,reject)=>{get.onsuccess=resolve;get.onerror=()=>reject(get.error)});
-      if(get.result){const o=get.result;o.phase=phase;o.updated_at=new Date().toISOString();st.put(o)}
+      if(get.result){
+        const o=get.result;
+        o.phase=phase;
+        o.status=status;
+        o.updated_at=new Date().toISOString();
+        if(status==='em_producao'&&!o.started_at)o.started_at=o.updated_at;
+        if(status==='finalizado'&&!o.finished_at)o.finished_at=o.updated_at;
+        st.put(o);
+      }
       await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});
       db.close();
       if('BroadcastChannel' in window){const ch=new BroadcastChannel('painel-producao-updates');ch.postMessage({type:'changed'});ch.close()}
@@ -48,9 +62,14 @@
 
   async function setPhase(orderId,phase){
     const h=await sessionHeaders();
-    const r=await fetch(`${window.PPAuth.url}/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}`,{method:'PATCH',headers:{...h,Prefer:'return=minimal'},body:JSON.stringify({phase,updated_at:new Date().toISOString()})});
+    const status=statusForPhase(phase);
+    const now=new Date().toISOString();
+    const patch={phase,status,updated_at:now};
+    if(status==='em_producao')patch.started_at=now;
+    if(status==='finalizado')patch.finished_at=now;
+    const r=await fetch(`${window.PPAuth.url}/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}`,{method:'PATCH',headers:{...h,Prefer:'return=minimal'},body:JSON.stringify(patch)});
     if(!r.ok) throw new Error(await r.text());
-    await updateLocal(orderId,phase);
+    await updateLocal(orderId,phase,status);
   }
 
   function card(o){
