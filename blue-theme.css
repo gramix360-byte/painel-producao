@@ -1,0 +1,15 @@
+:root{--navy:#123a70;--navy2:#174b8f;--accent:#1769c2;--accent2:#2f80d1;--bg:#f4f8fd;--card:#fff;--line:#d9e5f2;--text:#172b45;--muted:#6b7f96;--bluebg:#edf5ff;--shadow:0 8px 28px rgba(23,76,143,.09)}
+.sidebar{background:linear-gradient(180deg,#123a70 0%,#174b8f 100%)}
+.nav-item.active,.customer-nav-btn.active,.phase-nav-btn.active{background:#fff!important;color:#1769c2!important;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.nav-item:hover,.customer-nav-btn:hover,.phase-nav-btn:hover{background:rgba(255,255,255,.14)}
+.brand{border-bottom-color:rgba(255,255,255,.18)}
+.brand-mark{color:#fff}
+.button.primary{background:#1769c2}.button.primary:hover{background:#125aa8}
+.button.secondary{background:#edf4fb;color:#174b8f}
+input:focus,select:focus,textarea:focus{border-color:#2f80d1;box-shadow:0 0 0 3px #dceeff}
+.stat strong,.order-number{color:#1769c2}.qty{background:#1769c2}
+.column-title{background:#1769c2}.column-title.production{background:#123a70}
+.order-card-head{background:#edf5ff}.badge.aguardando{background:#e2efff;color:#1769c2}
+.toast{background:#123a70}.panel-catalog-hint:before{color:#1769c2!important}
+.tv-body{background:#eef4fb;color:#172b45}.tv-header{background:#123a70;color:#fff}.tv-clock{color:#dbe9f8}.tv-column-head.waiting{background:#2f80d1}.tv-column-head.doing{background:#123a70}.tv-number{color:#1769c2}.tv-item>strong{background:#1769c2}.tv-new-order{background:#1769c2}
+@media(max-width:760px){.sidebar,.sidebar nav{background:#123a70}.nav-item.active,.customer-nav-btn.active,.phase-nav-btn.active{background:#fff!important;color:#1769c2!important}}
