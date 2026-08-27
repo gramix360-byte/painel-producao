@@ -15,10 +15,11 @@
   <link rel="stylesheet" href="./pwa.css" />
   <link rel="stylesheet" href="./phases.css" />
   <link rel="stylesheet" href="./customers.css" />
+  <link rel="stylesheet" href="./products.css" />
   <link rel="stylesheet" href="./attachments.css" />
   <link rel="stylesheet" href="./production-phase.css" />
   <link rel="stylesheet" href="./blue-theme.css" />
-  <style>.panel-catalog-hint{display:block;color:#6c7d8e;font-size:11px;font-weight:500;margin-top:-3px}.panel-catalog-hint:before{content:'• ';color:#1769c2;font-weight:900}.revenue-stats{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:16px}.revenue-card strong{font-size:30px}.revenue-card{border-top:4px solid #1769c2}@media(max-width:760px){.revenue-stats{grid-template-columns:1fr}.revenue-card strong{font-size:27px}}</style>
+  <style>.panel-catalog-hint{display:block;color:#6c7d8e;font-size:11px;font-weight:500;margin-top:-3px}.panel-catalog-hint:before{content:'• ';color:#1769c2;font-weight:900}</style>
   <title>B de Brindes Produção</title>
 </head>
 <body style="visibility:hidden">
@@ -31,6 +32,7 @@
       <nav id="nav">
         <button class="nav-item active" data-view="dashboard">Dashboard</button>
         <button id="customers-nav" class="customer-nav-btn" type="button">Clientes</button>
+        <button id="products-nav" class="product-nav-btn" type="button">Produtos</button>
         <button class="nav-item" data-view="novo">Novo Pedido</button>
         <button id="phases-nav" class="phase-nav-btn" type="button">Fases</button>
         <button class="nav-item" data-view="producao">Produção</button>
@@ -43,6 +45,7 @@
       <div id="offline-banner" class="offline-banner hidden">Você está offline. Pode continuar trabalhando normalmente. As alterações serão sincronizadas quando a internet voltar.</div>
       <section id="view-dashboard" class="view active"></section>
       <section id="view-clientes" class="view"></section>
+      <section id="view-produtos" class="view"></section>
       <section id="view-novo" class="view"><form id="order-form" class="form-card"><div class="section-head"><h2>Novo pedido</h2><span>O número será gerado automaticamente</span></div><div class="form-grid"><label>Número do pedido<input id="order-number" value="Automático (#0001, #0002...)" readonly disabled /></label><label>Cliente<input id="customer-name" required placeholder="Nome do cliente" /></label><label>Prazo<input id="due-date" type="date" /></label><label>Prioridade<select id="priority"><option value="normal">Normal</option><option value="urgente">Urgente</option></select></label></div><label>Observações<textarea id="notes" rows="3" placeholder="Informações importantes para a produção"></textarea></label><div class="items-head"><h3>Itens do pedido</h3><button type="button" id="add-item" class="button secondary">+ Adicionar item</button></div><div id="items-list"></div><div class="form-actions"><button type="submit" class="button primary">Cadastrar pedido</button></div></form></section>
       <section id="view-fases" class="view"></section>
       <section id="view-producao" class="view"></section><section id="view-pedidos" class="view"></section><section id="view-sync" class="view"></section>
@@ -58,9 +61,11 @@
   <script src="./pwa-install.js"></script>
   <script src="./phases.js"></script>
   <script src="./customers.js"></script>
+  <script src="./products.js"></script>
   <script src="./attachments.js"></script>
   <script src="./local-catalog.js"></script>
   <script src="./revenue.js"></script>
+  <script src="./product-pricing.js"></script>
   <script src="./production-phase-bridge.js"></script>
   <script type="module" src="./app.js"></script>
 </body></html>
