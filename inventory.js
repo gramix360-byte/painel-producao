@@ -1,0 +1,6 @@
+(()=>{
+async function headers(){const s=await window.PPAuth.getSession();if(!s?.access_token)throw new Error('Sessão expirada');return{apikey:window.PPAuth.key,Authorization:`Bearer ${s.access_token}`,'Content-Type':'application/json'}}
+async function adjust(orderId,apply=true){const h=await headers();const r=await fetch(`${window.PPAuth.url}/rest/v1/rpc/adjust_order_stock`,{method:'POST',headers:h,body:JSON.stringify({p_order_id:orderId,p_apply:apply})});if(!r.ok)throw new Error(await r.text());window.PPProducts?.refresh?.();window.PPStandaloneCatalog?.refresh?.();return true}
+const nativeFetch=window.fetch.bind(window);window.fetch=async function(input,init={}){const url=typeof input==='string'?input:input.url;const res=await nativeFetch(input,init);try{if(res.ok&&url.includes('/rest/v1/order_items')&&init?.method==='POST'){const body=JSON.parse(init.body||'[]'),first=Array.isArray(body)?body[0]:body;if(first?.order_id)setTimeout(()=>adjust(first.order_id,true).catch(console.warn),80)}}catch(e){console.warn('Estoque automático',e)}return res};
+window.PPInventory={adjust};
+})();
