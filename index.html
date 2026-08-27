@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./pwa.css" />
   <link rel="stylesheet" href="./phases.css" />
+  <link rel="stylesheet" href="./customers.css" />
   <link rel="stylesheet" href="./attachments.css" />
   <link rel="stylesheet" href="./production-phase.css" />
   <style>.dananida-hint{display:block;color:#6c7d8e;font-size:11px;font-weight:500;margin-top:-3px}.dananida-hint:before{content:'↻ ';color:#ff006f;font-weight:900}</style>
@@ -28,6 +29,7 @@
       </div>
       <nav id="nav">
         <button class="nav-item active" data-view="dashboard">Dashboard</button>
+        <button id="customers-nav" class="customer-nav-btn" type="button">Clientes</button>
         <button class="nav-item" data-view="novo">Novo Pedido</button>
         <button id="phases-nav" class="phase-nav-btn" type="button">Fases</button>
         <button class="nav-item" data-view="producao">Produção</button>
@@ -39,6 +41,7 @@
       <header class="topbar"><div><h1 id="page-title">Dashboard</h1><p id="page-subtitle">Visão geral da produção</p></div><div class="connection-wrap"><button id="install-app" class="install-app" type="button">Instalar app</button><span id="connection-badge" class="connection online">Online</span><span id="pending-badge" class="pending-badge hidden">0 pendentes</span><button id="logout-button" class="button secondary" type="button">Sair</button></div></header>
       <div id="offline-banner" class="offline-banner hidden">Você está offline. Pode continuar trabalhando normalmente. As alterações serão sincronizadas quando a internet voltar.</div>
       <section id="view-dashboard" class="view active"></section>
+      <section id="view-clientes" class="view"></section>
       <section id="view-novo" class="view"><form id="order-form" class="form-card"><div class="section-head"><h2>Novo pedido</h2><span>O número será gerado automaticamente</span></div><div class="form-grid"><label>Número do pedido<input id="order-number" value="Automático (#0001, #0002...)" readonly disabled /></label><label>Cliente<input id="customer-name" required placeholder="Nome do cliente" /></label><label>Prazo<input id="due-date" type="date" /></label><label>Prioridade<select id="priority"><option value="normal">Normal</option><option value="urgente">Urgente</option></select></label></div><label>Observações<textarea id="notes" rows="3" placeholder="Informações importantes para a produção"></textarea></label><div class="items-head"><h3>Itens do pedido</h3><button type="button" id="add-item" class="button secondary">+ Adicionar item</button></div><div id="items-list"></div><div class="form-actions"><button type="submit" class="button primary">Cadastrar pedido</button></div></form></section>
       <section id="view-fases" class="view"></section>
       <section id="view-producao" class="view"></section><section id="view-pedidos" class="view"></section><section id="view-sync" class="view"></section>
@@ -53,6 +56,7 @@
   <script src="./email-notifier.js"></script>
   <script src="./pwa-install.js"></script>
   <script src="./phases.js"></script>
+  <script src="./customers.js"></script>
   <script src="./attachments.js"></script>
   <script src="./catalog-sync.js"></script>
   <script src="./production-phase-bridge.js"></script>
