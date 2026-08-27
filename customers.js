@@ -4,76 +4,24 @@
   let customers=[];
   let editingId=null;
 
-  async function headers(){
-    const s=await window.PPAuth?.getSession();
-    if(!s?.access_token)throw new Error('Sessão expirada');
-    return {apikey:window.PPAuth.key,Authorization:`Bearer ${s.access_token}`,'Content-Type':'application/json'};
-  }
-
-  async function load(){
-    const h=await headers();
-    const r=await fetch(`${window.PPAuth.url}/rest/v1/customers?select=*&order=name.asc`,{headers:h});
-    if(!r.ok)throw new Error(await r.text());
-    customers=await r.json();
-    renderList();
-    window.DananidaCatalog?.refresh?.();
-  }
+  async function headers(){const s=await window.PPAuth?.getSession();if(!s?.access_token)throw new Error('Sessão expirada');return {apikey:window.PPAuth.key,Authorization:`Bearer ${s.access_token}`,'Content-Type':'application/json'}}
+  async function load(){const h=await headers();const r=await fetch(`${window.PPAuth.url}/rest/v1/customers?select=*&order=name.asc`,{headers:h});if(!r.ok)throw new Error(await r.text());customers=await r.json();renderList();window.PPStandaloneCatalog?.refresh?.()}
 
   function ensureUI(){
-    const host=$('#view-clientes');
-    if(!host||host.dataset.ready)return;
-    host.dataset.ready='1';
+    const host=$('#view-clientes');if(!host||host.dataset.ready)return;host.dataset.ready='1';
     host.innerHTML=`<div class="customers-grid"><form id="customer-form" class="customer-form"><h2>Novo cliente</h2><input id="customer-id" type="hidden"><label>Nome / Empresa<input id="customer-name-reg" required placeholder="Nome do cliente ou empresa"></label><label>CPF / CNPJ<input id="customer-document" placeholder="CPF ou CNPJ"></label><label>WhatsApp / Telefone<input id="customer-phone" placeholder="(00) 00000-0000"></label><label>E-mail<input id="customer-email" type="email" placeholder="cliente@email.com"></label><label>Endereço<textarea id="customer-address" rows="3" placeholder="Rua, número, bairro, cidade, CEP"></textarea></label><label>Observações<textarea id="customer-notes" rows="3" placeholder="Informações importantes sobre o cliente"></textarea></label><div class="customer-form-actions"><button id="customer-cancel" type="button" class="button secondary hidden">Cancelar edição</button><button type="submit" class="button primary">Salvar cliente</button></div></form><section class="customer-list-panel"><div class="customers-toolbar"><input id="customer-search" placeholder="Buscar por nome, telefone, e-mail ou CPF/CNPJ"><button id="customer-refresh" type="button" class="button secondary">Atualizar</button></div><h2>Clientes cadastrados</h2><div id="customer-list"></div></section></div>`;
-    $('#customer-form').addEventListener('submit',save);
-    $('#customer-search').addEventListener('input',renderList);
-    $('#customer-refresh').addEventListener('click',()=>load().catch(showError));
-    $('#customer-cancel').addEventListener('click',resetForm);
+    $('#customer-form').addEventListener('submit',save);$('#customer-search').addEventListener('input',renderList);$('#customer-refresh').addEventListener('click',()=>load().catch(showError));$('#customer-cancel').addEventListener('click',resetForm);
   }
 
-  function renderList(){
-    const list=$('#customer-list');if(!list)return;
-    const q=($('#customer-search')?.value||'').trim().toLowerCase();
-    const rows=customers.filter(c=>!q||[c.name,c.phone,c.email,c.document,c.address].some(v=>String(v||'').toLowerCase().includes(q)));
-    list.innerHTML=rows.length?rows.map(c=>`<article class="customer-card"><div class="customer-card-head"><div><h3>${esc(c.name)}</h3><div class="customer-card-meta">${c.document?`<span>${esc(c.document)}</span>`:''}${c.phone?`<span>${esc(c.phone)}</span>`:''}${c.email?`<span>${esc(c.email)}</span>`:''}${c.address?`<span>${esc(c.address)}</span>`:''}</div></div><div class="customer-card-actions"><button type="button" class="button secondary customer-edit" data-id="${c.id}">Editar</button><button type="button" class="button danger customer-delete" data-id="${c.id}">Excluir</button></div></div>${c.notes?`<div class="customer-card-meta" style="margin-top:8px">Obs.: ${esc(c.notes)}</div>`:''}</article>`).join(''):'<div class="customer-empty">Nenhum cliente encontrado.</div>';
-    list.querySelectorAll('.customer-edit').forEach(b=>b.onclick=()=>edit(b.dataset.id));
-    list.querySelectorAll('.customer-delete').forEach(b=>b.onclick=()=>remove(b.dataset.id));
-  }
+  function renderList(){const list=$('#customer-list');if(!list)return;const q=($('#customer-search')?.value||'').trim().toLowerCase();const rows=customers.filter(c=>!q||[c.name,c.phone,c.email,c.document,c.address].some(v=>String(v||'').toLowerCase().includes(q)));list.innerHTML=rows.length?rows.map(c=>`<article class="customer-card"><div class="customer-card-head"><div><h3>${esc(c.name)}</h3><div class="customer-card-meta">${c.document?`<span>${esc(c.document)}</span>`:''}${c.phone?`<span>${esc(c.phone)}</span>`:''}${c.email?`<span>${esc(c.email)}</span>`:''}${c.address?`<span>${esc(c.address)}</span>`:''}</div></div><div class="customer-card-actions"><button type="button" class="button secondary customer-edit" data-id="${c.id}">Editar</button><button type="button" class="button danger customer-delete" data-id="${c.id}">Excluir</button></div></div>${c.notes?`<div class="customer-card-meta" style="margin-top:8px">Obs.: ${esc(c.notes)}</div>`:''}</article>`).join(''):'<div class="customer-empty">Nenhum cliente encontrado.</div>';list.querySelectorAll('.customer-edit').forEach(b=>b.onclick=()=>edit(b.dataset.id));list.querySelectorAll('.customer-delete').forEach(b=>b.onclick=()=>remove(b.dataset.id))}
 
-  function edit(id){
-    const c=customers.find(x=>x.id===id);if(!c)return;
-    editingId=id;$('#customer-form h2').textContent='Editar cliente';$('#customer-name-reg').value=c.name||'';$('#customer-document').value=c.document||'';$('#customer-phone').value=c.phone||'';$('#customer-email').value=c.email||'';$('#customer-address').value=c.address||'';$('#customer-notes').value=c.notes||'';$('#customer-cancel').classList.remove('hidden');$('#customer-name-reg').focus();
-  }
-
+  function edit(id){const c=customers.find(x=>x.id===id);if(!c)return;editingId=id;$('#customer-form h2').textContent='Editar cliente';$('#customer-name-reg').value=c.name||'';$('#customer-document').value=c.document||'';$('#customer-phone').value=c.phone||'';$('#customer-email').value=c.email||'';$('#customer-address').value=c.address||'';$('#customer-notes').value=c.notes||'';$('#customer-cancel').classList.remove('hidden');$('#customer-name-reg').focus()}
   function resetForm(){editingId=null;$('#customer-form').reset();$('#customer-form h2').textContent='Novo cliente';$('#customer-cancel').classList.add('hidden')}
 
-  async function save(e){
-    e.preventDefault();
-    const payload={name:$('#customer-name-reg').value.trim(),document:$('#customer-document').value.trim()||null,phone:$('#customer-phone').value.trim()||null,email:$('#customer-email').value.trim()||null,address:$('#customer-address').value.trim()||null,notes:$('#customer-notes').value.trim()||null,active:true,updated_at:new Date().toISOString()};
-    if(!payload.name)return;
-    const h=await headers();
-    const url=editingId?`${window.PPAuth.url}/rest/v1/customers?id=eq.${encodeURIComponent(editingId)}`:`${window.PPAuth.url}/rest/v1/customers`;
-    const r=await fetch(url,{method:editingId?'PATCH':'POST',headers:{...h,Prefer:'return=minimal'},body:JSON.stringify(payload)});
-    if(!r.ok){showError(new Error(await r.text()));return}
-    resetForm();await load();alert(editingId?'Cliente atualizado.':'Cliente salvo com sucesso.');
-  }
-
-  async function remove(id){
-    const c=customers.find(x=>x.id===id);if(!c)return;
-    if(!confirm(`Excluir o cliente "${c.name}"?`))return;
-    const h=await headers();const r=await fetch(`${window.PPAuth.url}/rest/v1/customers?id=eq.${encodeURIComponent(id)}`,{method:'DELETE',headers:h});
-    if(!r.ok){showError(new Error(await r.text()));return}
-    await load();
-  }
-
+  async function save(e){e.preventDefault();const wasEditing=!!editingId;const payload={name:$('#customer-name-reg').value.trim(),document:$('#customer-document').value.trim()||null,phone:$('#customer-phone').value.trim()||null,email:$('#customer-email').value.trim()||null,address:$('#customer-address').value.trim()||null,notes:$('#customer-notes').value.trim()||null,active:true,updated_at:new Date().toISOString()};if(!payload.name)return;const h=await headers();const url=editingId?`${window.PPAuth.url}/rest/v1/customers?id=eq.${encodeURIComponent(editingId)}`:`${window.PPAuth.url}/rest/v1/customers`;const r=await fetch(url,{method:editingId?'PATCH':'POST',headers:{...h,Prefer:'return=minimal'},body:JSON.stringify(payload)});if(!r.ok){showError(new Error(await r.text()));return}resetForm();await load();alert(wasEditing?'Cliente atualizado.':'Cliente salvo com sucesso.')}
+  async function remove(id){const c=customers.find(x=>x.id===id);if(!c)return;if(!confirm(`Excluir o cliente "${c.name}"?`))return;const h=await headers();const r=await fetch(`${window.PPAuth.url}/rest/v1/customers?id=eq.${encodeURIComponent(id)}`,{method:'DELETE',headers:h});if(!r.ok){showError(new Error(await r.text()));return}await load()}
   function showError(e){console.error(e);alert('Não foi possível concluir esta ação agora. Verifique a conexão e tente novamente.')}
-
-  function open(){
-    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));$('#view-clientes')?.classList.add('active');
-    document.querySelectorAll('.nav-item,.phase-nav-btn,.customer-nav-btn').forEach(b=>b.classList.remove('active'));$('#customers-nav')?.classList.add('active');
-    if($('#page-title'))$('#page-title').textContent='Clientes';if($('#page-subtitle'))$('#page-subtitle').textContent='Cadastro e pesquisa de clientes';
-    ensureUI();load().catch(showError);
-  }
-
+  function open(){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));$('#view-clientes')?.classList.add('active');document.querySelectorAll('.nav-item,.phase-nav-btn,.customer-nav-btn').forEach(b=>b.classList.remove('active'));$('#customers-nav')?.classList.add('active');if($('#page-title'))$('#page-title').textContent='Clientes';if($('#page-subtitle'))$('#page-subtitle').textContent='Cadastro e pesquisa de clientes';ensureUI();load().catch(showError)}
   document.addEventListener('DOMContentLoaded',()=>{$('#customers-nav')?.addEventListener('click',open);document.querySelectorAll('.nav-item,.phase-nav-btn').forEach(b=>b.addEventListener('click',()=>$('#customers-nav')?.classList.remove('active')))});
   window.PPCustomers={open,refresh:load};
 })();
