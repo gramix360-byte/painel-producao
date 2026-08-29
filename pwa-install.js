@@ -46,4 +46,13 @@
     button?.classList.remove('show');
     tip?.classList.remove('show');
   });
+
+  // Carrega o sincronizador de estoque do Mercado Livre sem depender do HTML principal.
+  if(!document.querySelector('script[data-ml-stock-sync]')){
+    const s=document.createElement('script');
+    s.src='./mercadolivre-stock-sync.js';
+    s.dataset.mlStockSync='1';
+    s.defer=true;
+    document.head.appendChild(s);
+  }
 })();
