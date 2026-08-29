@@ -1,12 +1,12 @@
 (()=>{
 const ROLE_RULES={
-  admin:['dashboard','clientes','produtos','orcamentos','novo','fases','producao','pedidos','financeiro','relatorios','sync','configuracoes'],
+  admin:['dashboard','clientes','produtos','orcamentos','novo','fases','producao','pedidos','financeiro','relatorios','sync','shopee','configuracoes'],
   vendas:['clientes','produtos','orcamentos','novo','pedidos'],
   producao:['produtos','producao']
 };
 const NAV_MAP={
   'customers-nav':'clientes','products-nav':'produtos','quotes-nav':'orcamentos','phases-nav':'fases',
-  'finance-nav':'financeiro','reports-nav':'relatorios','settings-nav':'configuracoes'
+  'finance-nav':'financeiro','reports-nav':'relatorios','shopee-nav':'shopee','settings-nav':'configuracoes'
 };
 function navArea(el){if(!el)return null;if(el.id&&NAV_MAP[el.id])return NAV_MAP[el.id];if(el.classList.contains('nav-item'))return el.dataset.view||null;return null}
 async function getProfile(){
