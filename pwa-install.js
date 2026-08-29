@@ -1,6 +1,24 @@
 (()=>{
   const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
   if(isStandalone) document.documentElement.classList.add('standalone');
+
+  // Mantém o app instalado sempre na versão mais recente.
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',async()=>{
+      try{
+        const reg=await navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'});
+        await reg.update();
+        let reloading=false;
+        navigator.serviceWorker.addEventListener('controllerchange',()=>{
+          if(reloading)return;
+          reloading=true;
+          location.reload();
+        });
+        if(reg.waiting) reg.waiting.postMessage?.({type:'SKIP_WAITING'});
+      }catch(err){console.error('Falha ao atualizar app',err)}
+    });
+  }
+
   let deferredPrompt=null;
   const button=document.getElementById('install-app');
   const tip=document.getElementById('ios-install-tip');
