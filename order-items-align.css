@@ -1,0 +1,10 @@
+/* Alinhamento visual dos itens do Novo Pedido */
+#view-novo .item-row{grid-template-columns:130px minmax(360px,1fr) 150px 150px 120px;gap:10px;align-items:start;padding:14px 12px}
+#view-novo .item-row label{margin:0;align-self:start}
+#view-novo .item-row label>input,#view-novo .item-row label>select{height:46px;margin:0}
+#view-novo .item-row .product-picker-wrap,#view-novo .item-row .product-picker{align-self:start}
+#view-novo .item-row .remove-item{height:46px;align-self:start;margin-top:0}
+#view-novo .panel-catalog-hint{min-height:17px;margin-top:5px;line-height:17px}
+@media(max-width:1250px) and (min-width:761px){#view-novo .item-row{grid-template-columns:110px minmax(280px,1fr) 140px 140px 110px}}
+@media(max-width:1050px) and (min-width:761px){#view-novo .item-row{grid-template-columns:110px minmax(260px,1fr) 140px;align-items:start}#view-novo .item-row .remove-item{grid-column:auto}}
+@media(max-width:760px){#view-novo .item-row{grid-template-columns:1fr!important;gap:9px!important}#view-novo .item-row .remove-item{width:100%;margin-top:0}}
