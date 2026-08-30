@@ -47,32 +47,34 @@
     tip?.classList.remove('show');
   });
 
-  // Sincronização automática de estoque: qualquer alteração de estoque em Produtos
-  // chama o backend do Mercado Livre depois que o produto é salvo com sucesso.
-  if(!window.__PP_ML_STOCK_SYNC__){
-    window.__PP_ML_STOCK_SYNC__=true;
+  // Sincronização automática Mercado Livre: estoque e preço de venda.
+  if(!window.__PP_ML_PRODUCT_SYNC__){
+    window.__PP_ML_PRODUCT_SYNC__=true;
     const nativeFetch=window.fetch.bind(window);
     async function mlHeaders(){
       const s=await window.PPAuth.getSession();
       if(!s?.access_token) throw new Error('Sessão expirada');
       return {apikey:window.PPAuth.key,Authorization:`Bearer ${s.access_token}`,'Content-Type':'application/json'};
     }
-    async function syncProduct(productId){
+    async function callSync(slug,productId,label){
       if(!productId)return null;
       try{
-        const r=await nativeFetch(`${window.PPAuth.url}/functions/v1/mercadolivre-sync-stock`,{
+        const r=await nativeFetch(`${window.PPAuth.url}/functions/v1/${slug}`,{
           method:'POST',headers:await mlHeaders(),body:JSON.stringify({product_id:productId})
         });
         const d=await r.json().catch(()=>({}));
-        if(!r.ok||d.error) throw new Error(d.error||'Falha ao sincronizar estoque');
-        const item=d.results?.[0];
-        if(item&&!item.ok) console.warn('Mercado Livre: estoque não sincronizado',item.error);
-        return item||d;
+        if(!r.ok||d.error) throw new Error(d.error||`Falha ao sincronizar ${label}`);
+        const item=d.results?.[0]||d;
+        if(item&&item.ok===false) console.warn(`Mercado Livre: ${label} não sincronizado`,item.error);
+        return item;
       }catch(e){
-        console.warn('Mercado Livre: erro na sincronização automática de estoque',e);
+        console.warn(`Mercado Livre: erro na sincronização automática de ${label}`,e);
         return null;
       }
     }
+    const syncStock=productId=>callSync('mercadolivre-sync-stock',productId,'estoque');
+    const syncPrice=productId=>callSync('mercadolivre-sync-price',productId,'preço');
+
     window.fetch=async function(input,init={}){
       const response=await nativeFetch(input,init);
       try{
@@ -81,19 +83,23 @@
         if(response.ok&&url.includes('/rest/v1/products')&&(method==='POST'||method==='PATCH')){
           let body={};
           try{body=typeof init.body==='string'?JSON.parse(init.body):{}}catch{}
-          if(!body.deleted_at&&body.stock!==undefined){
+          if(!body.deleted_at){
             let productId='';
             const m=url.match(/[?&]id=eq\.([^&]+)/);
             if(m) productId=decodeURIComponent(m[1]);
             else{
               try{const rows=await response.clone().json();productId=rows?.[0]?.id||''}catch{}
             }
-            if(productId) setTimeout(()=>syncProduct(productId),250);
+            if(productId){
+              if(body.stock!==undefined) setTimeout(()=>syncStock(productId),250);
+              if(body.sale_price!==undefined) setTimeout(()=>syncPrice(productId),400);
+            }
           }
         }
-      }catch(e){console.warn('Mercado Livre: falha ao agendar estoque',e)}
+      }catch(e){console.warn('Mercado Livre: falha ao agendar sincronização',e)}
       return response;
     };
-    window.PPMercadoLivreStock={syncProduct};
+    window.PPMercadoLivreStock={syncProduct:syncStock};
+    window.PPMercadoLivrePrice={syncProduct:syncPrice};
   }
 })();
