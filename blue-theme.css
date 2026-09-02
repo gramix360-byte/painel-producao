@@ -1,19 +1,19 @@
-:root{--navy:#123a70;--navy2:#174b8f;--accent:#1769c2;--accent2:#2f80d1;--bg:#f4f8fd;--card:#fff;--line:#d9e5f2;--text:#172b45;--muted:#6b7f96;--bluebg:#edf5ff;--shadow:0 8px 28px rgba(23,76,143,.09)}
+:root{--navy:#071a34;--navy2:#0b2b52;--accent:#1198f2;--accent2:#18e0ef;--bg:#f4f8fd;--card:#fff;--line:#d9e5f2;--text:#172b45;--muted:#6b7f96;--bluebg:#edf5ff;--shadow:0 8px 28px rgba(11,43,82,.09)}
 html,body,button,input,select,textarea{font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif!important;font-weight:400;letter-spacing:0}
 body{font-size:14px;line-height:1.45}
 h1{font-size:24px!important;font-weight:600!important;letter-spacing:-.35px}h2{font-size:19px!important;font-weight:600!important}h3{font-size:16px!important;font-weight:600!important}
 strong,b{font-weight:600}.topbar p,.section-head span,.muted,.panel-catalog-hint{font-weight:400!important}
-.sidebar{background:linear-gradient(180deg,#123a70 0%,#174b8f 100%)}
-.brand strong{font-size:15px;font-weight:600}.brand small{font-size:11px;font-weight:400}.nav-item,.customer-nav-btn,.product-nav-btn,.phase-nav-btn{font-size:13px!important;font-weight:400!important}
-.nav-item.active,.customer-nav-btn.active,.product-nav-btn.active,.phase-nav-btn.active{background:#fff!important;color:#1769c2!important;box-shadow:0 3px 10px rgba(0,0,0,.10);font-weight:500!important}
+.sidebar{background:linear-gradient(180deg,#071a34 0%,#0b2b52 100%)}
+.brand strong{font-size:0!important;font-weight:700}.brand strong:after{content:'KODA';font-size:18px;letter-spacing:1.2px;color:#fff}.brand small{font-size:0!important;font-weight:400}.brand small:after{content:'Sua operação. Tudo conectado.';font-size:9px;color:#b9d7f4;letter-spacing:.15px}.nav-item,.customer-nav-btn,.product-nav-btn,.phase-nav-btn{font-size:13px!important;font-weight:400!important}
+.nav-item.active,.customer-nav-btn.active,.product-nav-btn.active,.phase-nav-btn.active{background:#fff!important;color:#1198f2!important;box-shadow:0 3px 10px rgba(0,0,0,.10);font-weight:500!important}
 .nav-item:hover,.customer-nav-btn:hover,.product-nav-btn:hover,.phase-nav-btn:hover{background:rgba(255,255,255,.14)}
 .brand{border-bottom-color:rgba(255,255,255,.18)}.brand-mark{color:#fff}
-.button{font-size:13px!important;font-weight:500!important}.button.primary{background:#1769c2}.button.primary:hover{background:#125aa8}.button.secondary{background:#edf4fb;color:#174b8f}
-input,select,textarea{font-size:13px!important;font-weight:400!important}label{font-size:12px!important;font-weight:500!important;color:#42566d}input:focus,select:focus,textarea:focus{border-color:#2f80d1;box-shadow:0 0 0 3px #dceeff}
-.stat span{font-size:11px!important;font-weight:500!important}.stat strong{font-size:26px!important;font-weight:600!important}.stat strong,.order-number{color:#1769c2}.order-number{font-weight:600!important}.qty{background:#1769c2}
-.column-title{background:#1769c2}.column-title.production{background:#123a70}.column-title h2{font-size:15px!important;font-weight:600!important}
-.order-card-head{background:#edf5ff}.order-card-head strong,.customer-name{font-weight:600!important}.badge{font-size:11px!important;font-weight:500!important}.badge.aguardando{background:#e2efff;color:#1769c2}
-.toast{background:#123a70}.panel-catalog-hint:before{color:#1769c2!important}
+.button{font-size:13px!important;font-weight:500!important}.button.primary{background:#1198f2}.button.primary:hover{background:#087fcf}.button.secondary{background:#edf4fb;color:#0b2b52}
+input,select,textarea{font-size:13px!important;font-weight:400!important}label{font-size:12px!important;font-weight:500!important;color:#42566d}input:focus,select:focus,textarea:focus{border-color:#18bfe0;box-shadow:0 0 0 3px #d8f7fb}
+.stat span{font-size:11px!important;font-weight:500!important}.stat strong{font-size:26px!important;font-weight:600!important}.stat strong,.order-number{color:#1198f2}.order-number{font-weight:600!important}.qty{background:#1198f2}
+.column-title{background:#1198f2}.column-title.production{background:#071a34}.column-title h2{font-size:15px!important;font-weight:600!important}
+.order-card-head{background:#edf8ff}.order-card-head strong,.customer-name{font-weight:600!important}.badge{font-size:11px!important;font-weight:500!important}.badge.aguardando{background:#e2f4ff;color:#1198f2}
+.toast{background:#071a34}.panel-catalog-hint:before{color:#1198f2!important}
 .customer-table,.product-table{font-size:13px!important}.customer-table th,.product-table th{font-size:11px!important;font-weight:600!important;text-transform:uppercase;letter-spacing:.25px}.customer-table td,.product-table td{font-weight:400!important}
-.tv-body{background:#eef4fb;color:#172b45}.tv-header{background:#123a70;color:#fff}.tv-brand{font-weight:600!important}.tv-clock{color:#dbe9f8;font-weight:400!important}.tv-column-head.waiting{background:#2f80d1}.tv-column-head.doing{background:#123a70}.tv-column-head h1,.tv-column-head strong{color:#fff!important;font-weight:600!important}.tv-number{color:#1769c2}.tv-item>strong{background:#1769c2}.tv-new-order{background:#1769c2}
-@media(max-width:760px){body{font-size:13px}.sidebar,.sidebar nav{background:#123a70}.nav-item.active,.customer-nav-btn.active,.product-nav-btn.active,.phase-nav-btn.active{background:#fff!important;color:#1769c2!important}h1{font-size:21px!important}}
+.tv-body{background:#eef4fb;color:#172b45}.tv-header{background:#071a34;color:#fff}.tv-brand{font-weight:600!important}.tv-clock{color:#dbe9f8;font-weight:400!important}.tv-column-head.waiting{background:#1198f2}.tv-column-head.doing{background:#071a34}.tv-column-head h1,.tv-column-head strong{color:#fff!important;font-weight:600!important}.tv-number{color:#1198f2}.tv-item>strong{background:#1198f2}.tv-new-order{background:#1198f2}
+@media(max-width:760px){body{font-size:13px}.sidebar,.sidebar nav{background:#071a34}.nav-item.active,.customer-nav-btn.active,.product-nav-btn.active,.phase-nav-btn.active{background:#fff!important;color:#1198f2!important}h1{font-size:21px!important}}
