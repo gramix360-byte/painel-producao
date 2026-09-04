@@ -2,7 +2,7 @@
   "id":"./",
   "name":"KODA",
   "short_name":"KODA",
-  "description":"Sua operação. Tudo conectado.",
+  "description":"Gestão que produz.",
   "start_url":"./?source=pwa",
   "scope":"./",
   "display":"standalone",
