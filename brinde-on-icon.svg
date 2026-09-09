@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Brinde On">
+  <defs>
+    <linearGradient id="green" x1="110" y1="80" x2="405" y2="430" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#93f000"/>
+      <stop offset="0.52" stop-color="#7ed321"/>
+      <stop offset="1" stop-color="#2e7d32"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#050505"/>
+  <path d="M163 150a151 151 0 1 0 186 0" fill="none" stroke="url(#green)" stroke-width="58" stroke-linecap="round"/>
+  <path d="M256 73v190" fill="none" stroke="url(#green)" stroke-width="58" stroke-linecap="round"/>
+</svg>
