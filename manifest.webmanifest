@@ -8,12 +8,12 @@
   "display":"standalone",
   "display_override":["window-controls-overlay","standalone"],
   "orientation":"portrait-primary",
-  "background_color":"#f4f8fd",
-  "theme_color":"#071a34",
+  "background_color":"#050505",
+  "theme_color":"#050505",
   "lang":"pt-BR",
   "categories":["business","productivity"],
   "icons":[
-    {"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"},
-    {"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"maskable"}
+    {"src":"./brinde-on-icon.svg?v=2","sizes":"any","type":"image/svg+xml","purpose":"any"},
+    {"src":"./brinde-on-icon.svg?v=2","sizes":"any","type":"image/svg+xml","purpose":"maskable"}
   ]
 }
