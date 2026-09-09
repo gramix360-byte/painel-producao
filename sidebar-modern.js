@@ -116,7 +116,7 @@
     const footer = document.createElement("div");
     footer.className = "sidebar-footer";
     footer.innerHTML =
-      '<div class="sidebar-user"><div class="sidebar-avatar">G</div><div><strong>Gramix 360</strong><small>Administrador</small></div></div><button type="button" class="sidebar-logout"><span class="sidebar-icon">↪</span><span>Sair do sistema</span></button>';
+      '<div class="sidebar-user"><div class="sidebar-avatar">G</div><div><strong>Brindes On</strong><small>Administrativo</small></div></div><button type="button" class="sidebar-logout"><span class="sidebar-icon">↪</span><span>Sair do sistema</span></button>';
     side.appendChild(footer);
     footer.querySelector(".sidebar-logout").onclick = () =>
       document.getElementById("logout-button")?.click();
