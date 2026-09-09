@@ -161,15 +161,24 @@
       canvas.className = `studio-canvas studio-${c.format} studio-${c.style}`;
       canvas.style.setProperty("--studio-bg", c.bg || "#111111");
       canvas.style.setProperty("--studio-accent", c.accent || "#7ed321");
+      const productImage = uploadedImage || p?.image || "";
+      const details = q("#studio-brief")
+        .value.split(/[,;\n]/)
+        .map((item) => item.trim())
+        .filter(Boolean);
+      const benefits = [
+        details[0] || "Resistente e durável",
+        details[1] || "Personalização de alta qualidade",
+        details[2] || "Ideal para brindes e eventos",
+      ];
+      const mainImage = productImage
+        ? `<img src="${esc(productImage)}" alt="${esc(p?.name || "Produto")}">`
+        : '<span class="premium-empty">Envie a foto do produto</span>';
+      const crop = (position, label) =>
+        `<div class="premium-detail"><div>${productImage ? `<img src="${esc(productImage)}" style="object-position:${position}">` : ""}</div><b>${esc(label)}</b></div>`;
+      canvas.innerHTML = `<div class="premium-brand"><strong>BRINDE <i>ON</i></strong><small>SUA MARCA SEMPRE LIGADA</small></div><div class="premium-copy"><h2 id="studio-preview-title">${esc(c.title)}</h2><p id="studio-preview-subtitle">${esc(c.subtitle)}</p><span></span></div><div class="premium-main-product" id="studio-product-box">${mainImage}</div><div class="premium-benefits">${benefits.map((item, index) => `<div><i>${["◆", "★", "■"][index]}</i><b>${esc(item)}</b></div>`).join("")}</div><div class="premium-details">${crop("20% 50%", "DETALHE RESISTENTE")}${crop("50% 50%", "PERSONALIZAÇÃO")}${crop("80% 50%", "ACABAMENTO PREMIUM")}</div><div class="premium-footer" id="studio-preview-cta">${esc(c.cta)}</div>`;
       q("#studio-size").textContent =
         c.format === "feed" ? "1080 × 1080" : "1080 × 1920";
-      q("#studio-preview-title").textContent = c.title;
-      q("#studio-preview-subtitle").textContent = c.subtitle;
-      q("#studio-preview-cta").textContent = c.cta;
-      const productImage = uploadedImage || p?.image || "";
-      q("#studio-product-box").innerHTML = productImage
-        ? `<img src="${esc(productImage)}" alt="${esc(p?.name || "Produto")}" style="transform:translate(${c.x || 0}%,${c.y || 0}%) scale(${(c.scale || 100) / 100})">`
-        : "<span>Produto sem imagem cadastrada</span>";
       q(".studio-canvas-wrap").classList.remove("studio-ai-empty");
       q("#studio-result-label").textContent = "Opção criada pelo KODA";
       generated = true;
@@ -217,11 +226,7 @@
       q("#studio-title").focus();
     };
     ["#studio-title", "#studio-subtitle", "#studio-cta"].forEach((sel) =>
-      q(sel).addEventListener("input", () => {
-        q("#studio-preview-title").textContent = q("#studio-title").value;
-        q("#studio-preview-subtitle").textContent = q("#studio-subtitle").value;
-        q("#studio-preview-cta").textContent = q("#studio-cta").value;
-      }),
+      q(sel).addEventListener("input", () => generated && render()),
     );
     q(".marketing-close").onclick = close;
     q("#studio-cancel").onclick = close;
