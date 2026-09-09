@@ -113,6 +113,43 @@
     if (!r.ok) throw Error(await r.text());
     return edit ? post.id : (await r.json())?.[0]?.id;
   }
+  function removeWhiteBackground(dataUrl, tolerance = 28) {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => {
+        const canvas = document.createElement("canvas");
+        const maxSide = 1800;
+        const scale = Math.min(
+          1,
+          maxSide / Math.max(image.width, image.height),
+        );
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const threshold = 255 - Number(tolerance || 0);
+        const feather = 24;
+        for (let i = 0; i < pixels.data.length; i += 4) {
+          const r = pixels.data[i];
+          const g = pixels.data[i + 1];
+          const b = pixels.data[i + 2];
+          const darkest = Math.min(r, g, b);
+          const neutral = Math.max(r, g, b) - darkest < 22;
+          if (!neutral) continue;
+          if (darkest >= threshold) pixels.data[i + 3] = 0;
+          else if (darkest > threshold - feather)
+            pixels.data[i + 3] = Math.round(
+              ((threshold - darkest) / feather) * pixels.data[i + 3],
+            );
+        }
+        ctx.putImageData(pixels, 0, 0);
+        resolve(canvas.toDataURL("image/png"));
+      };
+      image.onerror = reject;
+      image.src = dataUrl;
+    });
+  }
   async function openStudio(existing = null) {
     try {
       if (!products.length) await load();
@@ -128,7 +165,8 @@
       today = new Date().toISOString().slice(0, 10);
     let variation = 0,
       generated = !!existing,
-      uploadedImage = d.productImage || existing?.image || "";
+      uploadedImage = d.productImage || existing?.image || "",
+      originalImage = uploadedImage;
     const modal = document.createElement("div");
     modal.className = "marketing-modal-backdrop";
     modal.dataset.kodaStudio = "1";
@@ -136,6 +174,12 @@
     document.body.appendChild(modal);
     const q = (s) => modal.querySelector(s),
       close = () => modal.remove();
+    const removalControls = document.createElement("div");
+    removalControls.className = "studio-bg-removal";
+    removalControls.innerHTML = `<label><input id="studio-remove-bg" type="checkbox" checked> Remover fundo branco automaticamente</label><label>Intensidade <input id="studio-bg-tolerance" type="range" min="8" max="65" value="28"><output id="studio-bg-value">28</output></label><small>Reduza a intensidade se o produto possuir partes brancas.</small>`;
+    q("#studio-upload")
+      .closest("label")
+      .insertAdjacentElement("afterend", removalControls);
     function render(c) {
       const p = products.find(
         (x) => String(x.id) === String(q("#studio-product").value),
@@ -208,16 +252,33 @@
         btn.textContent = "✨ Criar minha arte";
       }, 450);
     }
+    async function applyBackgroundRemoval() {
+      if (!originalImage) return;
+      const enabled = q("#studio-remove-bg").checked;
+      q("#studio-bg-value").value = q("#studio-bg-tolerance").value;
+      uploadedImage = enabled
+        ? await removeWhiteBackground(
+            originalImage,
+            q("#studio-bg-tolerance").value,
+          )
+        : originalImage;
+      generate();
+    }
     q("#studio-upload").onchange = (event) => {
       const file = event.target.files?.[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = () => {
-        uploadedImage = String(reader.result || "");
-        generate();
+      reader.onload = async () => {
+        originalImage = String(reader.result || "");
+        await applyBackgroundRemoval();
       };
       reader.readAsDataURL(file);
     };
+    q("#studio-remove-bg").onchange = applyBackgroundRemoval;
+    q("#studio-bg-tolerance").oninput = () => {
+      q("#studio-bg-value").value = q("#studio-bg-tolerance").value;
+    };
+    q("#studio-bg-tolerance").onchange = applyBackgroundRemoval;
     q("#studio-accent").oninput = () => generated && render();
     q("#studio-generate").onclick = generate;
     q("#studio-another").onclick = generate;
