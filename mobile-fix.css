@@ -1,0 +1,107 @@
+/* Ajustes finais da interface para celulares */
+@media (max-width: 760px) {
+  html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
+  body { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
+
+  .sidebar {
+    position: static !important;
+    width: 100% !important;
+    min-height: 64px !important;
+    padding: 8px 12px !important;
+    overflow: visible !important;
+  }
+  .brand {
+    min-height: 48px !important;
+    height: 48px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 9px !important;
+    border: 0 !important;
+  }
+  .brand-mark { width: 38px !important; height: 38px !important; border-radius: 10px !important; }
+  .brand-mark img { width: 32px !important; height: 32px !important; }
+  .brand strong::after { font-size: 18px !important; }
+  .brand small::after { font-size: 8px !important; }
+
+  .main { width: 100% !important; margin: 0 !important; padding: 0 10px 18px !important; }
+  .topbar {
+    min-height: 0 !important;
+    padding: 10px 2px 9px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 7px 10px !important;
+  }
+  .topbar > div:first-child { width: auto !important; min-width: 0; }
+  .topbar h1 { font-size: 21px !important; line-height: 1.1 !important; }
+  .topbar p { margin-top: 3px !important; font-size: 11px !important; line-height: 1.25 !important; }
+  .connection-wrap { width: auto !important; justify-content: flex-end !important; gap: 5px !important; }
+  .connection-wrap .install-app, .connection-wrap .pending-badge.hidden { display: none !important; }
+  .connection, .pending-badge { padding: 5px 8px !important; font-size: 10px !important; }
+  .connection-wrap .button { min-height: 32px !important; margin: 0 !important; padding: 6px 9px !important; font-size: 10px !important; }
+
+  .dashboard-pro { gap: 10px !important; }
+  .dash-card { padding: 12px !important; border-radius: 12px !important; }
+  .dash-hero { min-height: 0 !important; padding: 12px 10px !important; }
+  .dash-hero-date { position: static !important; margin-bottom: 7px; font-size: 10px !important; }
+  .dash-live { font-size: 10px !important; }
+  .dash-kicker { font-size: 9px !important; }
+  .dash-big { margin: 8px 0 6px !important; font-size: 35px !important; letter-spacing: -1px !important; }
+  .dash-orders-count { font-size: 11px !important; }
+  .dash-comparisons { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px !important; margin-top: 12px !important; }
+  .dash-compare { min-width: 0 !important; padding: 8px 5px !important; border-radius: 10px !important; }
+  .dash-compare small { font-size: 8px !important; }
+  .dash-compare strong { font-size: 15px !important; white-space: nowrap; }
+
+  .today-center { gap: 10px !important; }
+  .today-head { padding: 13px !important; gap: 8px !important; border-radius: 12px !important; }
+  .today-head h2 { font-size: 17px !important; line-height: 1.15 !important; }
+  .today-head p { font-size: 11px !important; }
+  .today-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 7px !important; }
+  .today-kpi { min-width: 0; padding: 9px !important; gap: 7px !important; }
+  .today-kpi-icon { width: 30px !important; height: 30px !important; }
+  .today-kpi strong { font-size: 17px !important; }
+
+  .sidebar nav {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 100 !important;
+    display: flex !important;
+    grid-template-columns: none !important;
+    gap: 2px !important;
+    margin: 0 !important;
+    padding: 5px 5px calc(5px + env(safe-area-inset-bottom)) !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    background: rgba(255,255,255,.98) !important;
+  }
+  .sidebar nav::-webkit-scrollbar { display: none; }
+  .sidebar-group { display: block !important; flex: 0 0 68px !important; scroll-snap-align: start; margin: 0 !important; }
+  .sidebar-group-toggle {
+    width: 68px !important;
+    min-width: 68px !important;
+    min-height: 54px !important;
+    padding: 5px 2px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    text-align: center !important;
+    line-height: 1.05 !important;
+  }
+  .sidebar-group-label { display: block !important; flex: none !important; max-width: 64px; font-size: 8.5px !important; white-space: normal; }
+  .sidebar-group-icon { width: auto !important; font-size: 16px !important; }
+  .sidebar-group-arrow, .sidebar-group-items { display: none !important; }
+  .sidebar-group.open > .sidebar-group-toggle, .sidebar-group-toggle:active { background: #eaf3ff !important; color: #1267f4 !important; }
+}
+
+@media (max-width: 380px) {
+  .main { padding-left: 8px !important; padding-right: 8px !important; }
+  .dash-big { font-size: 32px !important; }
+  .dash-compare strong { font-size: 14px !important; }
+}
