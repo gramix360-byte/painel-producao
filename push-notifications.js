@@ -15,6 +15,27 @@
       const session = await window.PPAuth?.getSession?.();
       if (session?.user?.id) await OneSignal.login(session.user.id);
 
+      const mountPermissionButton = () => {
+        if (OneSignal.Notifications.permission) return;
+        const host = document.querySelector(".connection-wrap");
+        if (!host || document.getElementById("push-permission-button")) return;
+        const button = document.createElement("button");
+        button.id = "push-permission-button";
+        button.type = "button";
+        button.className = "button secondary";
+        button.textContent = "🔔 Ativar alertas";
+        button.onclick = async () => {
+          await OneSignal.Notifications.requestPermission();
+          if (OneSignal.Notifications.permission) button.remove();
+        };
+        host.insertBefore(button, document.getElementById("logout-button"));
+      };
+      mountPermissionButton();
+      OneSignal.Notifications.addEventListener("permissionChange", (allowed) => {
+        if (allowed) document.getElementById("push-permission-button")?.remove();
+        else mountPermissionButton();
+      });
+
       window.KodaPush = {
         requestPermission: () => OneSignal.Notifications.requestPermission(),
         permission: () => OneSignal.Notifications.permission,
