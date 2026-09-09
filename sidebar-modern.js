@@ -57,6 +57,10 @@
       h.onclick = () => valid[0]?.click();
     } else
       h.onclick = () => {
+        if (window.matchMedia("(max-width: 760px)").matches) {
+          valid[0]?.click();
+          return;
+        }
         const opening = !g.classList.contains("open");
         nav
           .querySelectorAll(".sidebar-group.open")
