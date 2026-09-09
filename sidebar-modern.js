@@ -47,6 +47,7 @@
     body.className = "sidebar-group-items";
     if (single) {
       body.hidden = true;
+      body.style.display = "none";
       body.setAttribute("aria-hidden", "true");
     }
     valid.forEach((b) => body.appendChild(b));
@@ -173,4 +174,3 @@
   if (document.readyState === "loading")
     document.addEventListener("DOMContentLoaded", mount);
   else mount();
-})();
