@@ -1,11 +1,11 @@
 (()=>{
 const ROLE_RULES={
-  admin:['dashboard','clientes','produtos','orcamentos','novo','fases','producao','pedidos','compras','financeiro','relatorios','marketing','sync','integracoes','configuracoes'],
-  vendas:['dashboard','clientes','produtos','orcamentos','novo','pedidos','marketing'],
-  producao:['dashboard','produtos','fases','producao','pedidos'],
+  admin:['dashboard','clientes','produtos','orcamentos','novo','fases','producao','expedicao','pedidos','compras','financeiro','relatorios','marketing','sync','integracoes','configuracoes'],
+  vendas:['dashboard','clientes','produtos','orcamentos','novo','expedicao','pedidos','marketing'],
+  producao:['dashboard','produtos','fases','producao','expedicao','pedidos'],
   financeiro:['dashboard','pedidos','compras','financeiro','relatorios']
 };
-const NAV_MAP={'customers-nav':'clientes','products-nav':'produtos','quotes-nav':'orcamentos','phases-nav':'fases','purchases-nav':'compras','finance-nav':'financeiro','reports-nav':'relatorios','marketing-nav':'marketing','integrations-nav':'integracoes','settings-nav':'configuracoes'};
+const NAV_MAP={'customers-nav':'clientes','products-nav':'produtos','quotes-nav':'orcamentos','phases-nav':'fases','purchases-nav':'compras','finance-nav':'financeiro','reports-nav':'relatorios','marketing-nav':'marketing','integrations-nav':'integracoes','settings-nav':'configuracoes','shipping-nav':'expedicao'};
 function navArea(el){if(!el)return null;if(el.id&&NAV_MAP[el.id])return NAV_MAP[el.id];if(el.classList.contains('nav-item'))return el.dataset.view||null;return null}
 async function getProfile(){try{const s=await window.PPAuth?.getSession?.();if(!s?.access_token)return null;const uid=s.user?.id;if(!uid)return{role:'admin',active:true,display_name:s.user?.email||'Administrador'};const r=await fetch(`${window.PPAuth.url}/rest/v1/user_profiles?select=user_id,email,display_name,role,active&user_id=eq.${encodeURIComponent(uid)}&limit=1`,{headers:{apikey:window.PPAuth.key,Authorization:`Bearer ${s.access_token}`}});if(!r.ok)return{role:'admin',active:true,display_name:s.user?.email||'Administrador'};const a=await r.json();return a[0]||{role:'admin',active:true,display_name:s.user?.email||'Administrador'}}catch(e){console.warn('Permissões não carregadas; acesso administrativo preservado.',e);return{role:'admin',active:true}}}
 function roleLabel(v){return({admin:'Administrador',vendas:'Vendas',producao:'Produção',financeiro:'Financeiro'})[v]||'Administrador'}
