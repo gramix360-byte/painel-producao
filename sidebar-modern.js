@@ -8,6 +8,7 @@
     pedidos: "▣",
     phases: "≡",
     producao: "⚙",
+    shipping: "▰",
     purchases: "▱",
     finance: "▥",
     reports: "◔",
@@ -82,6 +83,7 @@
       novo: document.querySelector('.nav-item[data-view="novo"]'),
       phases: document.getElementById("phases-nav"),
       producao: document.querySelector('.nav-item[data-view="producao"]'),
+      shipping: document.getElementById("shipping-nav"),
       pedidos: document.querySelector('.nav-item[data-view="pedidos"]'),
       purchases: document.getElementById("purchases-nav"),
       finance: document.getElementById("finance-nav"),
@@ -108,7 +110,7 @@
       map.customers,
     ]);
     makeGroup(nav, "produtos", "Produtos", [map.products, map.purchases]);
-    makeGroup(nav, "producao", "Produção", [map.phases, map.producao]);
+    makeGroup(nav, "producao", "Produção", [map.phases, map.producao, map.shipping]);
     makeGroup(nav, "financeiro", "Financeiro", [map.finance, map.reports]);
     makeGroup(nav, "marketing", "Marketing", [map.marketing], { single: true });
     makeGroup(nav, "canais", "Canais de Venda", [map.sync, map.integrations]);
