@@ -16,3 +16,66 @@
 .sidebar.collapsed .sidebar-group-label{font-size:12px;overflow-wrap:anywhere}
 @media(max-width:760px){.sidebar nav .sidebar-group-toggle{min-width:0!important;width:100%!important}.sidebar .sidebar-group-label{font-size:12px;white-space:normal;overflow-wrap:anywhere}}
 @media(max-width:760px){.sidebar{display:block!important}.topbar{position:static;margin:0;padding:14px 0 10px!important;border:0;background:transparent}.sidebar-group[data-group="inicio"],.sidebar-group[data-group="vendas"],.sidebar-group[data-group="producao"],.sidebar-group[data-group="expedicao"],.sidebar-group[data-group="produtos"]{display:contents!important}.sidebar-group[data-group="financeiro"],.sidebar-group[data-group="canais"],.sidebar-group[data-group="admin"]{display:none!important}.sidebar-group.open>.sidebar-group-items{position:fixed!important;left:12px!important;right:12px!important;bottom:76px!important;z-index:120!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:6px!important;padding:10px!important;border:1px solid #dfe7ef!important;border-radius:14px!important;background:#fff!important;box-shadow:0 -8px 28px rgba(20,45,75,.16)!important}.sidebar-group.open>.sidebar-group-items>button{display:flex!important;color:#30465f!important;background:#f5f8fb!important;min-width:0!important;width:100%!important;text-align:left!important;justify-content:flex-start!important}.sidebar-group.open>.sidebar-group-items>button.active{color:#1267f4!important;background:#eaf3ff!important}}
+
+/* Compras em telas pequenas: cabeçalho e indicadores mais compactos. */
+@media(max-width:760px){
+  .connection-wrap{grid-column:1/-1!important;width:100%!important;justify-content:flex-start!important;flex-wrap:nowrap!important}
+  #role-badge{max-width:190px!important;padding:5px 8px!important;font-size:9px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .connection-wrap #logout-button{margin-left:auto!important}
+
+  #view-compras .purchase-head{
+    display:block!important;
+    margin:0 0 9px!important;
+    padding:10px!important;
+    border:1px solid #dce6f0!important;
+    border-radius:12px!important;
+    background:#fff!important;
+  }
+  #view-compras .purchase-head>div:first-child{display:none!important}
+  #view-compras .purchase-head>div:last-child{
+    display:grid!important;
+    grid-template-columns:1fr 1.25fr!important;
+    gap:7px!important;
+    width:100%!important;
+  }
+  #view-compras .purchase-head .button{
+    width:100%!important;
+    min-height:38px!important;
+    padding:8px 6px!important;
+    border-radius:10px!important;
+    font-size:11px!important;
+    white-space:nowrap!important;
+  }
+  #view-compras .purchase-kpis{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+    margin-bottom:10px!important;
+  }
+  #view-compras .purchase-kpis>div{
+    min-width:0!important;
+    min-height:82px!important;
+    padding:11px!important;
+    border-radius:12px!important;
+  }
+  #view-compras .purchase-kpis small{font-size:9px!important;line-height:1.25!important}
+  #view-compras .purchase-kpis strong{margin-top:5px!important;font-size:21px!important;line-height:1.1!important;overflow-wrap:anywhere!important}
+  #view-compras .purchase-toolbar{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 105px!important;
+    gap:7px!important;
+    margin-bottom:10px!important;
+  }
+  #view-compras .purchase-toolbar input,
+  #view-compras .purchase-toolbar select{min-width:0!important;padding:10px!important;font-size:12px!important}
+  #view-compras .purchase-grid{grid-template-columns:1fr!important;gap:10px!important}
+  #view-compras .purchase-grid>section{padding:11px!important;border-radius:12px!important}
+  #view-compras .purchase-card{padding:10px!important;gap:8px!important}
+  #view-compras .purchase-actions{width:100%!important}
+  #view-compras .purchase-actions .button{flex:1!important;min-height:36px!important;padding:7px!important;font-size:10px!important}
+}
+
+@media(max-width:360px){
+  #view-compras .purchase-head>div:last-child{grid-template-columns:1fr!important}
+  #view-compras .purchase-toolbar{grid-template-columns:1fr!important}
+}
