@@ -79,3 +79,45 @@
   #view-compras .purchase-head>div:last-child{grid-template-columns:1fr!important}
   #view-compras .purchase-toolbar{grid-template-columns:1fr!important}
 }
+
+/* Mantém os botões do menu inferior legíveis no celular. */
+@media(max-width:760px){
+  .sidebar nav{
+    gap:5px!important;
+    padding:6px 7px calc(6px + env(safe-area-inset-bottom))!important;
+    background:#fff!important;
+    border-top:1px solid #d8e3ef!important;
+  }
+  .sidebar nav .sidebar-group-toggle{
+    box-sizing:border-box!important;
+    flex:0 0 72px!important;
+    width:72px!important;
+    min-width:72px!important;
+    min-height:50px!important;
+    padding:7px 4px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    border:1px solid transparent!important;
+    border-radius:10px!important;
+    background:#f5f8fc!important;
+    color:#263b56!important;
+    opacity:1!important;
+  }
+  .sidebar nav .sidebar-group-toggle .sidebar-group-label{
+    display:block!important;
+    max-width:66px!important;
+    color:inherit!important;
+    font-size:10px!important;
+    font-weight:700!important;
+    line-height:1.15!important;
+    opacity:1!important;
+    text-align:center!important;
+  }
+  .sidebar nav .sidebar-group.open>.sidebar-group-toggle,
+  .sidebar nav .sidebar-group:has(.sidebar-group-items>button.active)>.sidebar-group-toggle{
+    border-color:#cfe0f5!important;
+    background:#eaf3ff!important;
+    color:#075fd7!important;
+  }
+}
