@@ -1,0 +1,22 @@
+.sales-page-head{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:0 0 16px;padding:18px 20px;border:1px solid #dce6ef;border-radius:14px;background:#fff}
+.sales-page-head h2{margin:0;color:#11233f;font-size:20px}
+.sales-page-head p{margin:4px 0 0;color:#718197;font-size:13px}
+.sales-page-head .button{white-space:nowrap}
+.sales-hidden{display:none!important}
+.sales-back{justify-self:start;border:0;background:transparent;color:#1769c2;padding:0;cursor:pointer;font-size:13px;font-weight:700}
+#view-orcamentos .quotes-layout{display:block}
+#view-orcamentos .quote-list-panel{width:100%;padding:18px 20px}
+#view-orcamentos .quote-toolbar{display:grid;grid-template-columns:minmax(240px,1fr) auto;gap:10px;padding-bottom:14px;border-bottom:1px solid #edf1f5}
+#view-orcamentos .quote-form{width:min(980px,100%);margin:0 auto;padding:24px}
+#view-orcamentos .quote-card{display:grid;grid-template-columns:minmax(220px,1fr) minmax(240px,.85fr);column-gap:20px;padding:16px 18px}
+#view-orcamentos .quote-card-head{grid-column:1}
+#view-orcamentos .quote-meta{grid-column:1;margin-bottom:0}
+#view-orcamentos .quote-actions{grid-column:2;grid-row:1/3;align-content:center;justify-content:flex-end;margin:0}
+#view-orcamentos .quote-actions .button{font-size:12px;padding:9px 11px}
+#view-pedidos>.panel{margin-top:0;box-shadow:none}
+#view-pedidos .list-tools{padding-bottom:15px;border-bottom:1px solid #edf1f5}
+#view-pedidos .sales-order-row{min-height:82px;padding:14px 18px;border-radius:10px;box-shadow:none}
+#view-pedidos .sales-order-row .order-number{display:grid;gap:1px;min-width:110px;font-size:20px}
+#view-pedidos .sales-order-row .order-number small{color:#8796a8;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+@media(max-width:900px){#view-orcamentos .quote-card{display:block}#view-orcamentos .quote-actions{justify-content:flex-start;margin-top:12px}}
+@media(max-width:760px){.sales-page-head{align-items:stretch;flex-direction:column;padding:15px}.sales-page-head .button{width:100%}#view-orcamentos .quote-toolbar{grid-template-columns:1fr}#view-orcamentos .quote-list-panel,#view-orcamentos .quote-form{padding:14px}#view-orcamentos .quote-actions .button{width:100%}}

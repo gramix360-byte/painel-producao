@@ -1,0 +1,27 @@
+.dashboard-quick-actions{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding:12px 14px;border:1px solid #dce6ef;border-radius:12px;background:#fff}
+.dashboard-quick-actions>div{display:grid;margin-right:auto}
+.dashboard-quick-actions strong{color:#11233f;font-size:13px}
+.dashboard-quick-actions span{color:#8190a1;font-size:10px}
+.dashboard-quick-actions button{border:1px solid #dbe5ef;border-radius:9px;background:#f7f9fc;color:#38516d;padding:9px 12px;cursor:pointer;font-size:12px;font-weight:700}
+.dashboard-quick-actions button:first-of-type{border-color:#1267f4;background:#1267f4;color:#fff}
+.dashboard-organized{display:flex;flex-direction:column}
+.dashboard-organized>.dash-hero{order:0}
+.dashboard-organized>.today-center{order:1}
+.dashboard-organized>#dash-alert-center{order:2}
+.dashboard-organized>#dash-command{order:3}
+.dashboard-organized>#dash-finance-extra{order:4}
+.settings-module-head{margin-bottom:16px;padding:18px 20px 0;border:1px solid #dce6ef;border-radius:14px;background:#fff}
+.settings-module-head>div:first-child h2{margin:0;color:#11233f;font-size:20px}
+.settings-module-head>div:first-child p{margin:4px 0 14px;color:#718197;font-size:13px}
+.settings-module-tabs{display:flex;gap:4px;overflow-x:auto;border-top:1px solid #edf1f5;padding-top:7px}
+.settings-module-tabs button{position:relative;flex:0 0 auto;border:0;background:transparent;color:#65778c;padding:11px 13px;cursor:pointer;font-size:12px;font-weight:700}
+.settings-module-tabs button.active{color:#1267f4}
+.settings-module-tabs button.active:after{content:"";position:absolute;left:10px;right:10px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:#1267f4}
+.settings-section-hidden{display:none!important}
+#view-configuracoes .settings-card{box-shadow:none}
+#view-integracoes .shopee-sync-grid{gap:12px}
+#view-integracoes .integration-channel-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;min-height:210px;padding:18px!important;border:1px solid #dce6ef!important;box-shadow:none!important}
+.integration-letter{display:grid;place-items:center;width:42px;height:42px;margin-bottom:14px;border-radius:11px;background:#eaf3ff;color:#1267f4;font-size:18px;font-weight:900}
+#view-integracoes .integration-channel-card h3{font-size:16px}
+#view-integracoes .integration-channel-card .button{margin-top:auto}
+@media(max-width:760px){.dashboard-quick-actions{display:grid;grid-template-columns:1fr 1fr}.dashboard-quick-actions>div{grid-column:1/-1}.dashboard-quick-actions button{width:100%}.settings-module-head{padding:15px 15px 0}.settings-module-tabs{margin:0 -4px}.settings-module-tabs button{padding:11px 10px}}

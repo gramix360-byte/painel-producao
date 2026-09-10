@@ -8,6 +8,7 @@
     pedidos: "▣",
     phases: "≡",
     producao: "⚙",
+    expedicao: "➜",
     shipping: "▰",
     purchases: "▱",
     finance: "▥",
@@ -27,6 +28,21 @@
     canais: "↻",
     admin: "⚙",
   };
+  function ensureAsset(tag, attrs) {
+    const key = attrs.href || attrs.src;
+    if ([...document.querySelectorAll(tag)].some((node) => (node.href || node.src || "").includes(key))) return;
+    const node = document.createElement(tag);
+    Object.assign(node, attrs);
+    document.head.appendChild(node);
+  }
+  function loadOrganization() {
+    ["koda-olist", "sales-organizer", "catalog-organizer", "operations-organizer", "finance-organizer", "admin-organizer"].forEach((name) =>
+      ensureAsset("link", { rel: "stylesheet", href: `./${name}.css` }),
+    );
+    ["sales-organizer", "catalog-organizer", "operations-organizer", "finance-organizer", "admin-organizer"].forEach((name) =>
+      ensureAsset("script", { src: `./${name}.js` }),
+    );
+  }
   function textSpan(btn, key) {
     if (!btn) return null;
     if (!btn.querySelector(".sidebar-icon"))
@@ -68,6 +84,7 @@
     return g;
   }
   function mount() {
+    loadOrganization();
     const side = document.querySelector(".sidebar"),
       nav = document.getElementById("nav");
     if (!side || !nav || side.dataset.modern === "2") return;
@@ -102,23 +119,23 @@
       "<span>⌕</span><span>Buscar no sistema...</span><kbd>Ctrl K</kbd>";
     search.onclick = () => window.KodaSearch?.open?.();
     side.insertBefore(search, nav);
-    makeGroup(nav, "inicio", "Início", [map.dashboard], { single: true });
+    makeGroup(nav, "inicio", "Visão geral", [map.dashboard], { single: true });
     makeGroup(nav, "vendas", "Vendas", [
       map.quotes,
-      map.novo,
       map.pedidos,
       map.customers,
+      map.novo,
     ]);
     makeGroup(nav, "produtos", "Produtos", [map.products, map.purchases]);
-    makeGroup(nav, "producao", "Produção", [map.phases, map.producao, map.shipping]);
+    makeGroup(nav, "producao", "Produção", [map.producao], { single: true });
+    makeGroup(nav, "expedicao", "Expedição", [map.shipping], { single: true });
     makeGroup(nav, "financeiro", "Financeiro", [map.finance, map.reports]);
-    makeGroup(nav, "marketing", "Marketing", [map.marketing], { single: true });
-    makeGroup(nav, "canais", "Canais de Venda", [map.sync, map.integrations]);
-    makeGroup(nav, "admin", "Administração", [map.settings], { single: true });
+    makeGroup(nav, "canais", "Integrações", [map.integrations]);
+    makeGroup(nav, "admin", "Mais", [map.marketing, map.settings]);
     const footer = document.createElement("div");
     footer.className = "sidebar-footer";
     footer.innerHTML =
-      '<div class="sidebar-user"><div class="sidebar-avatar">G</div><div><strong>Brindes On</strong><small>Administrativo</small></div></div><button type="button" class="sidebar-logout"><span class="sidebar-icon">↪</span><span>Sair do sistema</span></button>';
+      '<div class="sidebar-user"><div class="sidebar-avatar">B</div><div><strong>Brindes On</strong><small>Administrativo</small></div></div><button type="button" class="sidebar-logout"><span class="sidebar-icon">↪</span><span>Sair do sistema</span></button>';
     side.appendChild(footer);
     footer.querySelector(".sidebar-logout").onclick = () =>
       document.getElementById("logout-button")?.click();

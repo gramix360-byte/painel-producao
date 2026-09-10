@@ -1,0 +1,20 @@
+.catalog-page-head{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:16px;padding:18px 20px;border:1px solid #dce6ef;border-radius:14px;background:#fff}
+.catalog-page-head h2{margin:0;color:#11233f;font-size:20px}
+.catalog-page-head p{margin:4px 0 0;color:#718197;font-size:13px}
+.catalog-head-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.catalog-hidden{display:none!important}
+.catalog-back{justify-self:start;border:0;background:transparent;color:#1769c2;padding:0 0 4px;cursor:pointer;font-size:13px;font-weight:700}
+#view-produtos .products-grid{display:block}
+#view-produtos .product-list-panel{width:100%;padding:18px 20px}
+#view-produtos .product-list-panel>h2{font-size:15px;margin:16px 0 8px}
+#view-produtos .product-form{width:min(920px,100%);margin:0 auto;padding:24px}
+#view-produtos .products-toolbar{display:grid;grid-template-columns:minmax(240px,1fr) auto;gap:10px;padding-bottom:14px;margin-bottom:0;border-bottom:1px solid #edf1f5}
+#view-produtos .products-toolbar>#smart-stock-button,#view-produtos .products-toolbar>#mfg-open{display:none!important}
+#view-produtos .product-card{padding:16px 10px}
+#view-produtos .product-card-head{align-items:center}
+#view-produtos .product-actions{justify-content:flex-end;min-width:290px}
+#view-produtos .product-actions .button{min-width:72px}
+#view-compras .catalog-purchase-head{padding:18px 20px;border:1px solid #dce6ef;border-radius:14px;background:#fff}
+#view-compras .purchase-kpis>div,#view-compras .purchase-card,#view-compras .supplier-card{box-shadow:none}
+@media(max-width:900px){.catalog-page-head{align-items:flex-start;flex-direction:column}.catalog-head-actions{justify-content:flex-start}.product-card-head{align-items:flex-start!important}.product-actions{min-width:0!important}}
+@media(max-width:760px){.catalog-page-head{padding:15px}.catalog-head-actions{display:grid;width:100%;grid-template-columns:1fr 1fr}.catalog-head-actions .button{width:100%;font-size:12px}#view-produtos .product-list-panel,#view-produtos .product-form{padding:14px}#view-produtos .products-toolbar{grid-template-columns:1fr}#view-produtos .product-actions{display:grid;grid-template-columns:1fr 1fr}#view-produtos .product-actions .button{width:100%}}

@@ -1,0 +1,13 @@
+/* Estrutura visual do KODA inspirada em ERPs modulares, com identidade Brindes On. */
+.sidebar{display:flex!important;flex-direction:column!important;padding:16px 12px!important;background:#fff!important}
+.sidebar nav{flex:1}
+.sidebar-footer{margin-top:auto!important}
+.sidebar-avatar{background:#101820!important;color:#59d600!important}
+.main{max-width:1800px}
+.sidebar-group{margin:2px 0!important}
+.sidebar-group-toggle{font-size:13px!important;min-height:44px!important}
+.sidebar nav .sidebar-group-items>button{font-size:12px!important;min-height:38px!important}
+.topbar{position:sticky;top:0;z-index:35;margin:0 -28px 18px;padding:17px 28px!important;background:rgba(243,246,249,.94);border-bottom:1px solid #e2e8f0;backdrop-filter:blur(10px)}
+.topbar h1{font-size:24px!important}
+.topbar p{font-size:13px}
+@media(max-width:760px){.sidebar{display:block!important}.topbar{position:static;margin:0;padding:14px 0 10px!important;border:0;background:transparent}.sidebar-group[data-group="inicio"],.sidebar-group[data-group="vendas"],.sidebar-group[data-group="producao"],.sidebar-group[data-group="expedicao"],.sidebar-group[data-group="produtos"]{display:contents!important}.sidebar-group[data-group="financeiro"],.sidebar-group[data-group="canais"],.sidebar-group[data-group="admin"]{display:none!important}.sidebar-group.open>.sidebar-group-items{position:fixed!important;left:12px!important;right:12px!important;bottom:76px!important;z-index:120!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:6px!important;padding:10px!important;border:1px solid #dfe7ef!important;border-radius:14px!important;background:#fff!important;box-shadow:0 -8px 28px rgba(20,45,75,.16)!important}.sidebar-group.open>.sidebar-group-items>button{display:flex!important;color:#30465f!important;background:#f5f8fb!important;min-width:0!important;width:100%!important;text-align:left!important;justify-content:flex-start!important}.sidebar-group.open>.sidebar-group-items>button.active{color:#1267f4!important;background:#eaf3ff!important}}

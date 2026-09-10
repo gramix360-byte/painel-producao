@@ -1,0 +1,20 @@
+.operation-page-head{margin-bottom:16px;padding:18px 20px;border:1px solid #dce6ef;border-radius:14px;background:#fff}
+.operation-head-row{display:flex;align-items:center;justify-content:space-between;gap:18px}
+.operation-page-head h2{margin:0;color:#11233f;font-size:20px}
+.operation-page-head p{margin:4px 0 0;color:#718197;font-size:13px}
+.operation-flow{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-top:18px;overflow:hidden;border:1px solid #e1e8ef;border-radius:10px;background:#f7f9fb}
+.operation-flow span{position:relative;display:flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:8px 10px;border-right:1px solid #e1e8ef;color:#6a7c90;font-size:12px;font-weight:700;text-align:center}
+.operation-flow span:last-child{border-right:0}
+.operation-flow i{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#e4eaf0;color:#607287;font-style:normal;font-size:10px}
+.operation-flow span.active{background:#eaf3ff;color:#1267f4}
+.operation-flow span.active i{background:#1267f4;color:#fff}
+#view-producao .production-columns{gap:16px}
+#view-producao .production-columns>div{min-width:0;padding:14px;border:1px solid #dce6ef;border-radius:14px;background:#f7f9fb}
+#view-producao .column-title{margin-bottom:12px;background:#47729f!important;color:#fff}
+#view-producao .column-title.production{background:#1769c2!important}
+#view-producao .order-card{box-shadow:none;border-width:1px}
+#view-producao .order-actions .status-action{background:#16845b}
+#view-expedicao .shipping-summary>div,#view-expedicao .shipping-card{box-shadow:none}
+#view-expedicao .shipping-summary strong{color:#1769c2}
+@media(max-width:900px){.operation-flow{grid-template-columns:repeat(5,minmax(120px,1fr));overflow-x:auto}.operation-head-row{align-items:flex-start;flex-direction:column}.operation-head-row .button{width:100%}}
+@media(max-width:760px){.operation-page-head{padding:15px}.operation-flow{display:flex}.operation-flow span{flex:0 0 125px}.production-columns>div{padding:10px!important}}
