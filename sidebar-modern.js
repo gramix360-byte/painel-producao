@@ -3,6 +3,9 @@
     dashboard: "⌂",
     customers: "♙",
     products: "◇",
+    calculator: "÷",
+    material: "▦",
+    cost: "R$",
     quotes: "▤",
     novo: "🛒",
     pedidos: "▣",
@@ -22,6 +25,7 @@
     inicio: "⌂",
     vendas: "▤",
     produtos: "◇",
+    custos: "R$",
     producao: "⚙",
     financeiro: "▥",
     marketing: "◁",
@@ -96,6 +100,9 @@
       dashboard: document.querySelector('.nav-item[data-view="dashboard"]'),
       customers: document.getElementById("customers-nav"),
       products: document.getElementById("products-nav"),
+      calculator: document.getElementById("cost-calculator-nav"),
+      material: document.getElementById("cost-materials-nav"),
+      cost: document.getElementById("cost-composition-nav"),
       quotes: document.getElementById("quotes-nav"),
       novo: document.querySelector('.nav-item[data-view="novo"]'),
       phases: document.getElementById("phases-nav"),
@@ -127,6 +134,7 @@
       map.novo,
     ]);
     makeGroup(nav, "produtos", "Produtos", [map.products, map.purchases]);
+    makeGroup(nav, "custos", "Custo", [map.calculator, map.material, map.cost]);
     makeGroup(nav, "producao", "Produção", [map.producao], { single: true });
     makeGroup(nav, "expedicao", "Expedição", [map.shipping], { single: true });
     makeGroup(nav, "financeiro", "Financeiro", [map.finance, map.reports]);
