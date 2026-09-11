@@ -193,3 +193,23 @@
 .sidebar.collapsed .brand>.brand-mark:last-child{
   display:block!important;
 }
+
+/* No celular, o sistema funciona como painel executivo de consulta. */
+@media(max-width:760px){
+  body{
+    padding-bottom:18px!important;
+  }
+  .sidebar{
+    padding-bottom:0!important;
+  }
+  .sidebar nav,
+  .sidebar-search,
+  #koda-search-button,
+  #view-dashboard .dashboard-quick-actions,
+  #view-dashboard .today-center{
+    display:none!important;
+  }
+  .main{
+    padding-bottom:24px!important;
+  }
+}
