@@ -1,8 +1,8 @@
 {
   "id":"./",
-  "name":"KODA",
-  "short_name":"KODA",
-  "description":"Gestão que produz.",
+  "name":"Brindes On",
+  "short_name":"Brindes On",
+  "description":"Sistema de gestão e produção da Brindes On.",
   "start_url":"./?source=pwa",
   "scope":"./",
   "display":"standalone",

@@ -75,6 +75,42 @@
   #view-compras .purchase-actions .button{flex:1!important;min-height:36px!important;padding:7px!important;font-size:10px!important}
 }
 
+/* Identidade Brindes On: mantém a assinatura legível no menu em todas as telas. */
+.sidebar .brand{
+  justify-content:center!important;
+}
+.sidebar .brand .brand-mark{
+  display:block!important;
+  width:216px!important;
+  height:auto!important;
+  min-width:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.sidebar .brand .brand-mark img{
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  object-fit:contain!important;
+}
+.sidebar .brand>div:last-child{
+  display:none!important;
+}
+@media(max-width:760px){
+  .sidebar .brand{
+    height:auto!important;
+    min-height:0!important;
+    padding:6px 4px 10px!important;
+  }
+  .sidebar .brand .brand-mark{
+    width:190px!important;
+    height:auto!important;
+  }
+}
+
 @media(max-width:360px){
   #view-compras .purchase-head>div:last-child{grid-template-columns:1fr!important}
   #view-compras .purchase-toolbar{grid-template-columns:1fr!important}
@@ -119,5 +155,35 @@
     border-color:#cfe0f5!important;
     background:#eaf3ff!important;
     color:#075fd7!important;
+  }
+}
+
+/* A assinatura horizontal precisa prevalecer sobre as regras compactas do menu móvel. */
+.sidebar .brand .brand-mark,
+.sidebar .brand .brand-mark img{
+  height:auto!important;
+}
+@media(max-width:760px){
+  .sidebar .brand{
+    height:auto!important;
+    min-height:0!important;
+    padding:6px 4px 10px!important;
+  }
+  .sidebar .brand .brand-mark{
+    width:190px!important;
+    min-width:0!important;
+    padding:0!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  .sidebar .brand .brand-mark img{
+    display:block!important;
+    width:100%!important;
+    object-fit:contain!important;
+  }
+  .sidebar .brand>div:last-child{
+    display:none!important;
   }
 }
