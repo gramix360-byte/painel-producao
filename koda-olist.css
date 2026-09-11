@@ -187,3 +187,9 @@
     display:none!important;
   }
 }
+
+/* A marca é o único bloco do cabeçalho; ela não pode herdar a ocultação do texto antigo. */
+.sidebar .brand>.brand-mark:last-child,
+.sidebar.collapsed .brand>.brand-mark:last-child{
+  display:block!important;
+}
