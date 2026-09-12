@@ -83,6 +83,13 @@
   const observer = new MutationObserver(run);
   function init() {
     observer.observe(document.body, { childList: true, subtree: true });
+    document.addEventListener("click", (event) => {
+      const button = event.target.closest("#view-financeiro [data-fin-tab]");
+      if (!button) return;
+      financeTab = button.dataset.finTab || "overview";
+      organizeFinance();
+      applyFinanceTab($("#view-financeiro"));
+    });
     run();
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
