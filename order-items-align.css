@@ -7,12 +7,13 @@
 #view-novo #order-number,#view-novo #customer-name{height:46px}
 
 /* Alinhamento visual dos itens do pedido */
-#view-novo .item-row{grid-template-columns:130px minmax(360px,1fr) 150px 150px 120px;gap:10px;align-items:start;padding:14px 12px}
+#view-novo .item-row{grid-template-columns:90px minmax(320px,1fr) minmax(140px,180px) 135px 145px 46px;gap:10px;align-items:start;padding:14px 12px}
 #view-novo .item-row label{margin:0;align-self:start}
 #view-novo .item-row label>input,#view-novo .item-row label>select{height:46px;margin:0}
 #view-novo .item-row .product-picker-wrap,#view-novo .item-row .product-picker{align-self:start}
-#view-novo .item-row .remove-item{height:46px;align-self:start;margin-top:0}
+#view-novo .item-row .remove-item{width:46px;height:46px;align-self:start;margin-top:22px;font-size:18px}
+#view-novo .item-row .item-line-total{font-weight:800;color:#183b63;background:#fff}
 #view-novo .panel-catalog-hint{min-height:17px;margin-top:5px;line-height:17px}
-@media(max-width:1250px) and (min-width:761px){#view-novo .item-row{grid-template-columns:110px minmax(280px,1fr) 140px 140px 110px}}
-@media(max-width:1050px) and (min-width:761px){#view-novo .item-row{grid-template-columns:110px minmax(260px,1fr) 140px;align-items:start}#view-novo .item-row .remove-item{grid-column:auto}}
-@media(max-width:760px){#view-novo .section-head{align-items:flex-start}#view-novo .form-grid{grid-template-columns:1fr!important;gap:10px!important}#view-novo .item-row{grid-template-columns:1fr!important;gap:9px!important}#view-novo .item-row .remove-item{width:100%;margin-top:0}}
+@media(max-width:1250px) and (min-width:761px){#view-novo .item-row{grid-template-columns:80px minmax(240px,1fr) 130px 120px 130px 44px}#view-novo .item-row .remove-item{width:44px}}
+@media(max-width:1050px) and (min-width:761px){#view-novo .item-row{grid-template-columns:90px minmax(260px,1fr) 1fr 46px}#view-novo .item-row label:nth-of-type(4){grid-column:2}#view-novo .item-row label:nth-of-type(5){grid-column:3}#view-novo .item-row .remove-item{grid-column:4;grid-row:1;margin-top:22px}}
+@media(max-width:760px){#view-novo .section-head{align-items:flex-start}#view-novo .form-grid{grid-template-columns:1fr!important;gap:10px!important}#view-novo .item-row{grid-template-columns:1fr 1fr!important;gap:9px!important}#view-novo .item-row label:nth-of-type(2),#view-novo .item-row label:nth-of-type(3){grid-column:1/-1}#view-novo .item-row .remove-item{grid-column:1/-1;width:100%;margin-top:0}}
