@@ -41,10 +41,10 @@
   }
   function loadOrganization() {
     ["koda-olist", "sales-organizer", "catalog-organizer", "operations-organizer", "finance-organizer", "admin-organizer"].forEach((name) =>
-      ensureAsset("link", { rel: "stylesheet", href: `./${name}.css` }),
+      ensureAsset("link", { rel: "stylesheet", href: `./${name}.css?v=2` }),
     );
     ["sales-organizer", "catalog-organizer", "operations-organizer", "finance-organizer", "admin-organizer"].forEach((name) =>
-      ensureAsset("script", { src: `./${name}.js` }),
+      ensureAsset("script", { src: `./${name}.js?v=2` }),
     );
   }
   function textSpan(btn, key) {
