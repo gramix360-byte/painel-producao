@@ -1,0 +1,22 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const vm=require('node:vm');
+const fs=require('node:fs');
+test('only the initiating BrindeOn window can fill an empty form; replay does not duplicate',async()=>{
+ const nonce='11111111-1111-4111-8111-111111111111',origin='https://brindeon-atendimento.gramix360.chatgpt.site';
+ const nodes=new Map(),listeners={},sent=[];let changes=0;
+ const node=()=>({value:'',style:{},click(){},dispatchEvent(){changes++},prepend(){},setAttribute(){},scrollIntoView(){}});
+ ['#items-list .item-row','#customer-name','#due-date','#priority','#notes','#items-list .item-qty','#items-list .item-product','#items-list .item-personalization','#sales-channel','#client-files','#order-form','.nav-item[data-view="novo"]'].forEach(k=>nodes.set(k,node()));
+ const source={postMessage:(value,target)=>sent.push({value,target})};
+ const data=new Map();
+ const context={window:{opener:source,addEventListener:(type,fn)=>listeners[type]=fn},location:{hash:'#brindeon='+nonce,pathname:'/painel-producao/index.html',search:''},sessionStorage:{getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)},document:{body:{style:{visibility:'visible'}},querySelector:k=>nodes.get(k),querySelectorAll:()=>[nodes.get('#items-list .item-product')],getElementById:k=>nodes.get('#'+k),createElement:node},history:{replaceState(){}},Event,Blob,Date,Uint8Array};
+ vm.runInNewContext(fs.readFileSync(__dirname+'/brindeon-import.js','utf8'),context);
+ const order={reference:nonce,customerName:'Cliente teste',phone:'5521999990000',product:'Caneca',quantity:2,due:'2026-10-01',notes:'Conferir arte',personalization:'Logo'};
+ const event={origin,source,data:{type:'brindeon-order',nonce,order}};
+ await listeners.message({...event,origin:'https://other.example'});assert.equal(changes,0);
+ await listeners.message({...event,source:{}});assert.equal(changes,0);
+ await listeners.message({...event,data:{...event.data,nonce:'wrong'}});assert.equal(changes,0);
+ await listeners.message({...event,data:{...event.data,order:{...order,quantity:-1}}});assert.equal(changes,0);assert.equal(sent.at(-1).value.type,'brindeon-error');
+ await listeners.message(event);assert.equal(nodes.get('#customer-name').value,'Cliente teste');assert.equal(nodes.get('#items-list .item-qty').value,'2');assert.equal(nodes.get('#sales-channel').value,'whatsapp');assert.match(nodes.get('#notes').value,/5521999990000/);assert.equal(sent.at(-1).value.type,'brindeon-filled');assert.equal(sent.at(-1).target,origin);
+ const count=changes;await listeners.message(event);assert.equal(changes,count);assert.equal(sent.at(-1).value.type,'brindeon-filled');
+});
