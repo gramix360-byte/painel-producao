@@ -16,6 +16,11 @@
     }catch(e){console.warn('Products performance guard',e)}
     return nativeFetch(input,init);
   };
+  // Do not let secondary product modules start expensive refreshes while the Products screen is open.
+  const productViewActive=()=>document.getElementById('view-produtos')?.classList.contains('active');
+  const guardRefresh=name=>{const fn=window[name]?.refresh;if(typeof fn!=='function')return;window[name].refresh=(...args)=>productViewActive()?Promise.resolve():fn(...args)};
+  const installGuards=()=>{guardRefresh('PPStandaloneCatalog');guardRefresh('PPProductPricing');guardRefresh('PPProductLocation');};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installGuards,{once:true});else installGuards();
   const ORIGIN='https://brindeon-atendimento.gramix360.chatgpt.site',KEY='brindeon-transfer';
   const match=location.hash.match(/^#brindeon=([a-f0-9-]{36})$/);
   if(match)sessionStorage.setItem(KEY,JSON.stringify({nonce:match[1],time:Date.now()}));
@@ -33,26 +38,9 @@
     if(!ready())throw Error('Aguarde o carregamento e o login do Painel de Produção.');
     if(document.querySelector('#customer-name').value.trim()||[...document.querySelectorAll('.item-product')].some(e=>e.value.trim()))throw Error('Já há um pedido sendo preenchido nesta janela. Conclua ou limpe o formulário antes de transferir outro.');
     document.querySelector('.nav-item[data-view="novo"]').click();
-    input('#customer-name',o.customerName);
-    input('#due-date',o.due);
-    input('#priority','normal');
-    input('#notes',`Origem: WhatsApp BrindeOn\nWhatsApp do cliente: +${o.phone}\nReferência: ${o.reference}${o.notes?'\n'+o.notes:''}`);
-    input('#items-list .item-qty',o.quantity);
-    input('#items-list .item-product',o.product);
-    input('#items-list .item-personalization',o.personalization);
-    input('#sales-channel','whatsapp');
+    input('#customer-name',o.customerName);input('#due-date',o.due);input('#priority','normal');input('#notes',`Origem: WhatsApp BrindeOn\nWhatsApp do cliente: +${o.phone}\nReferência: ${o.reference}${o.notes?'\n'+o.notes:''}`);input('#items-list .item-qty',o.quantity);input('#items-list .item-product',o.product);input('#items-list .item-personalization',o.personalization);input('#sales-channel','whatsapp');
     if(file){const dt=new DataTransfer();dt.items.add(new File([file],file.name||'arte-whatsapp.'+(file.type==='image/png'?'png':'jpg'),{type:file.type}));const el=document.getElementById('client-files');el.files=dt.files;el.dispatchEvent(new Event('change',{bubbles:true}))}
-    let banner=document.getElementById('brindeon-import-notice');
-    if(!banner){banner=document.createElement('p');banner.id='brindeon-import-notice';banner.setAttribute('role','status');banner.style.cssText='padding:14px;border:1px solid #b8dca0;border-radius:10px;background:#f0f8e5;color:#244814';document.getElementById('order-form').prepend(banner)}
-    banner.textContent='Pedido recebido do BrindeOn. Confira o produto cadastrado, os valores, o prazo e os arquivos antes de clicar em Cadastrar pedido.';
-    document.getElementById('order-form').scrollIntoView({behavior:'smooth'});
-    received=true;sessionStorage.removeItem(KEY);history.replaceState(null,'',location.pathname+location.search);send('brindeon-filled');
+    let banner=document.getElementById('brindeon-import-notice');if(!banner){banner=document.createElement('p');banner.id='brindeon-import-notice';banner.setAttribute('role','status');banner.style.cssText='padding:14px;border:1px solid #b8dca0;border-radius:10px;background:#f0f8e5;color:#244814';document.getElementById('order-form').prepend(banner)}banner.textContent='Pedido recebido do BrindeOn. Confira o produto cadastrado, os valores, o prazo e os arquivos antes de clicar em Cadastrar pedido.';document.getElementById('order-form').scrollIntoView({behavior:'smooth'});received=true;sessionStorage.removeItem(KEY);history.replaceState(null,'',location.pathname+location.search);send('brindeon-filled');
   }
-  window.addEventListener('message',async event=>{
-    if(event.origin!==ORIGIN||event.source!==source||event.data?.nonce!==pending.nonce||Date.now()-pending.time>180000)return;
-    if(event.data.type==='brindeon-ping'){if(received)send('brindeon-filled');else if(ready())send('brindeon-ready');return}
-    if(event.data.type!=='brindeon-order')return;
-    if(received){send('brindeon-filled');return}if(processing||!ready())return;
-    processing=true;try{await fill(event.data)}catch(e){send('brindeon-error',{message:e.message||'Não foi possível preencher o pedido.'})}finally{processing=false}
-  });
+  window.addEventListener('message',async event=>{if(event.origin!==ORIGIN||event.source!==source||event.data?.nonce!==pending.nonce||Date.now()-pending.time>180000)return;if(event.data.type==='brindeon-ping'){if(received)send('brindeon-filled');else if(ready())send('brindeon-ready');return}if(event.data.type!=='brindeon-order')return;if(received){send('brindeon-filled');return}if(processing||!ready())return;processing=true;try{await fill(event.data)}catch(e){send('brindeon-error',{message:e.message||'Não foi possível preencher o pedido.'})}finally{processing=false}});
 })();
