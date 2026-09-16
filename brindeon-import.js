@@ -1,5 +1,6 @@
 /* Receives a reviewed draft from BrindeOn. Saving remains in the existing order flow. */
 (()=>{
+  const performanceScript=document.createElement('script');performanceScript.src='./products-performance.js?v=1';document.head.appendChild(performanceScript);
   const ORIGIN='https://brindeon-atendimento.gramix360.chatgpt.site',KEY='brindeon-transfer';
   const match=location.hash.match(/^#brindeon=([a-f0-9-]{36})$/);
   if(match)sessionStorage.setItem(KEY,JSON.stringify({nonce:match[1],time:Date.now()}));
@@ -16,7 +17,6 @@
     if(data.file){file=data.file;if(!(file instanceof Blob)||!['image/png','image/jpeg'].includes(file.type)||file.size>10*1024*1024)throw Error('A arte deve ser PNG/JPG com até 10 MB.');const h=new Uint8Array(await file.slice(0,8).arrayBuffer());if(!(file.type==='image/png'?h[0]===137&&h[1]===80&&h[2]===78&&h[3]===71:h[0]===255&&h[1]===216&&h[2]===255))throw Error('Arquivo de arte inválido.')}
     if(!ready())throw Error('Aguarde o carregamento e o login do Painel de Produção.');
     if(document.querySelector('#customer-name').value.trim()||[...document.querySelectorAll('.item-product')].some(e=>e.value.trim()))throw Error('Já há um pedido sendo preenchido nesta janela. Conclua ou limpe o formulário antes de transferir outro.');
-    // Use the same fields and events as manual entry; catalog and payment checks remain active.
     document.querySelector('.nav-item[data-view="novo"]').click();
     input('#customer-name',o.customerName);
     input('#due-date',o.due);
