@@ -1,6 +1,21 @@
 /* Receives a reviewed draft from BrindeOn. Saving remains in the existing order flow. */
 (()=>{
-  const performanceScript=document.createElement('script');performanceScript.src='./products-performance.js?v=1';document.head.appendChild(performanceScript);
+  const nativeFetch=window.fetch.bind(window);
+  window.fetch=async function(input,init){
+    try{
+      const original=typeof input==='string'?input:input?.url||'';
+      if(original.includes('/rest/v1/products?')){
+        const u=new URL(original,location.href);
+        if(u.searchParams.get('select')==='*'&&!u.searchParams.has('limit'))u.searchParams.set('limit','100');
+        input=u.toString();
+      }else if(original.includes('/rest/v1/product_images?')){
+        const u=new URL(original,location.href);
+        if(!u.searchParams.has('limit'))u.searchParams.set('limit','500');
+        input=u.toString();
+      }
+    }catch(e){console.warn('Products performance guard',e)}
+    return nativeFetch(input,init);
+  };
   const ORIGIN='https://brindeon-atendimento.gramix360.chatgpt.site',KEY='brindeon-transfer';
   const match=location.hash.match(/^#brindeon=([a-f0-9-]{36})$/);
   if(match)sessionStorage.setItem(KEY,JSON.stringify({nonce:match[1],time:Date.now()}));
