@@ -43,9 +43,10 @@
     ["koda-olist", "sales-organizer", "catalog-organizer", "operations-organizer", "finance-organizer", "admin-organizer"].forEach((name) =>
       ensureAsset("link", { rel: "stylesheet", href: `./${name}.css?v=2` }),
     );
-    ["sales-organizer", "catalog-organizer", "operations-organizer", "finance-organizer", "admin-organizer"].forEach((name) =>
+    ["sales-organizer", "catalog-organizer", "operations-organizer", "finance-organizer"].forEach((name) =>
       ensureAsset("script", { src: `./${name}.js?v=2` }),
     );
+    ensureAsset("script", { src: "./admin-organizer.js?v=3" });
   }
   function textSpan(btn, key) {
     if (!btn) return null;
