@@ -1,6 +1,13 @@
 (() => {
   const $ = (selector, root = document) => root.querySelector(selector);
-  let settingsTab = "company";
+
+  function getSettingsTab(host) {
+    return host?.dataset.settingsTab || "company";
+  }
+
+  function setSettingsTab(host, tab) {
+    if (host) host.dataset.settingsTab = tab;
+  }
 
   function organizeDashboard() {
     const host = $("#view-dashboard");
@@ -42,9 +49,10 @@
         <button type="button" data-settings-tab="security">Segurança e histórico</button>
       </div>`;
     host.insertBefore(header, wrap);
+    setSettingsTab(host, getSettingsTab(host));
     header.querySelectorAll("[data-settings-tab]").forEach((button) => {
       button.onclick = () => {
-        settingsTab = button.dataset.settingsTab;
+        setSettingsTab(host, button.dataset.settingsTab);
         applySettings(host);
       };
     });
@@ -58,11 +66,12 @@
   }
 
   function applySettings(host) {
+    const currentTab = getSettingsTab(host);
     host.querySelectorAll("[data-settings-tab]").forEach((button) => {
-      button.classList.toggle("active", button.dataset.settingsTab === settingsTab);
+      button.classList.toggle("active", button.dataset.settingsTab === currentTab);
     });
     host.querySelectorAll(".settings-organized-card").forEach((card) => {
-      card.classList.toggle("settings-section-hidden", card.dataset.settingsSection !== settingsTab);
+      card.classList.toggle("settings-section-hidden", card.dataset.settingsSection !== currentTab);
     });
   }
 
@@ -71,6 +80,7 @@
     const wrap = $(".settings-wrap", host);
     if (!host || !wrap) return;
     settingsHeader(host, wrap);
+    if (!host.dataset.settingsTab) setSettingsTab(host, "company");
     markSettings($("#set-save", wrap)?.closest(".settings-card"), "company");
     markSettings($("#users-list", wrap)?.closest(".settings-card"), "users");
     markSettings($(".automation-list", wrap)?.closest(".settings-card"), "automation");
