@@ -385,7 +385,7 @@
   }
   async function deletePurchase(id) {
     const x = purchases.find((purchase) => purchase.id === id);
-    if (!x || x.status === "aguardando") return;
+    if (!x) return;
     if (
       !confirm(
         `Excluir a compra de ${x.product_name}?\n\nO estoque e o lançamento financeiro não serão alterados.`,
@@ -488,11 +488,11 @@
         ? rows
             .map((x) => {
               const st = state(x);
-              return `<article class="purchase-card"><div><b>${esc(x.product_name)}</b><small>${esc(x.supplier_name)} · ${Number(x.quantity)} un.${x.sku ? ` · SKU ${esc(x.sku)}` : ""}</small><small>Criado ${date(x.created_at)}${x.received_at ? ` · recebido ${date(x.received_at)}` : ""}</small></div><div><strong>${money(x.total_amount)}</strong><span class="${st}">${st === "recebido" ? "Recebido" : st === "cancelado" ? "Cancelado" : st === "atrasado" ? "Atrasado" : "Aguardando"}</span><small>${x.due_date ? `Vence ${date(x.due_date)}` : "Sem vencimento"} · ${x.finance_id ? "Conta gerada" : "Sem financeiro"}</small></div><div class="purchase-actions">${x.status === "aguardando" ? `<button data-receive="${x.id}" class="button secondary">Receber</button><button data-edit-purchase="${x.id}" class="button secondary">Editar</button><button data-cancel-purchase="${x.id}" class="button danger">Cancelar</button>` : `<button data-delete-purchase="${x.id}" class="button danger">Excluir</button>`}</div></article>`;
+              return `<article class="purchase-card"><div><b>${esc(x.product_name)}</b><small>${esc(x.supplier_name)} · ${Number(x.quantity)} un.${x.sku ? ` · SKU ${esc(x.sku)}` : ""}</small><small>Criado ${date(x.created_at)}${x.received_at ? ` · recebido ${date(x.received_at)}` : ""}</small></div><div><strong>${money(x.total_amount)}</strong><span class="${st}">${st === "recebido" ? "Recebido" : st === "cancelado" ? "Cancelado" : st === "atrasado" ? "Atrasado" : "Aguardando"}</span><small>${x.due_date ? `Vence ${date(x.due_date)}` : "Sem vencimento"} · ${x.finance_id ? "Conta gerada" : "Sem financeiro"}</small></div><div class="purchase-actions">${x.status === "aguardando" ? `<button data-receive="${x.id}" class="button secondary">Receber</button><button data-edit-purchase="${x.id}" class="button secondary">Editar</button><button data-cancel-purchase="${x.id}" class="button danger">Cancelar</button>` : ""}<button data-delete-purchase="${x.id}" class="button danger">Excluir</button></div></article>`;
             })
             .join("")
         : '<div class="purchase-empty">Nenhuma compra encontrada com este filtro.</div>'
-    }</section><section><div class="purchase-section-title"><h3>Fornecedores</h3><span>${suppliers.length}</span></div>${suppliers.length ? suppliers.map((x) => `<article class="supplier-card"><div><b>${esc(x.name)}</b><small>${esc(x.contact || "Sem contato")}</small></div><div class="supplier-actions"><button data-edit-supplier="${x.id}" class="button secondary">Editar</button><button data-delete-supplier="${x.id}" class="button danger">Desativar</button></div></article>`).join("") : '<div class="purchase-empty">Cadastre seu primeiro fornecedor.</div>'}<div class="purchase-history"><h3>Histórico de recebimentos</h3>${
+    }</section><section><div class="purchase-section-title"><h3>Fornecedores</h3><span>${suppliers.length}</span></div>${suppliers.length ? suppliers.map((x) => `<article class="supplier-card"><div><b>${esc(x.name)}</b><small>${esc(x.contact || "Sem contato")}</small></div><div class="supplier-actions"><button data-edit-supplier="${x.id}" class="button secondary">Editar</button><button data-delete-supplier="${x.id}" class="button danger">Excluir</button></div></article>`).join("") : '<div class="purchase-empty">Cadastre seu primeiro fornecedor.</div>'}<div class="purchase-history"><h3>Histórico de recebimentos</h3>${
       received.length
         ? received
             .slice(0, 8)
