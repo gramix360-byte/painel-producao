@@ -24,6 +24,8 @@
     ["folha", "Folha"],
     ["cm", "Centímetro"],
     ["m", "Metro"],
+    ["cm2", "Centímetro quadrado (cm²)"],
+    ["m2", "Metro quadrado (m²)"],
     ["g", "Grama"],
     ["kg", "Quilo"],
     ["ml", "Mililitro"],
@@ -35,6 +37,8 @@
     folha: ["folha"],
     cm: ["cm", "m"],
     m: ["m", "cm"],
+    cm2: ["cm2", "m2"],
+    m2: ["m2", "cm2"],
     g: ["g", "kg"],
     kg: ["kg", "g"],
     ml: ["ml", "L"],
@@ -45,6 +49,8 @@
     folha: 1,
     cm: 0.01,
     m: 1,
+    cm2: 0.0001,
+    m2: 1,
     g: 0.001,
     kg: 1,
     ml: 0.001,
@@ -58,7 +64,17 @@
   const convertQuantity = (value, from, to) =>
     (Number(value || 0) * (unitFactors[from] || 1)) / (unitFactors[to] || 1);
   const secondaryUnit = (unit) =>
-    ({ m: "cm", cm: "m", kg: "g", g: "kg", L: "ml", ml: "L" })[unit] || null;
+    ({
+      m: "cm",
+      cm: "m",
+      m2: "cm2",
+      cm2: "m2",
+      kg: "g",
+      g: "kg",
+      L: "ml",
+      ml: "L",
+    })[unit] || null;
+  const isAreaUnit = (unit) => unit === "m2" || unit === "cm2";
   let materials = [],
     products = [],
     editingMaterial = null,
@@ -130,7 +146,7 @@
     const host = $("#view-custos");
     host.innerHTML =
       tabs("calculator") +
-      `<section class="cost-card"><h2>Calculadora</h2><p>Descubra rapidamente o custo por unidade, peso ou metragem.</p><div class="cost-form-grid"><label>Valor pago (R$)<input id="quick-total" type="number" min="0" step="0.01" placeholder="10,00"></label><label>Quantidade comprada<input id="quick-quantity" type="number" min="0.0001" step="0.0001" placeholder="10"></label><label class="cost-wide">Unidade da compra<select id="quick-unit">${units.map(([value, label]) => `<option value="${value}">${label}</option>`).join("")}</select></label></div><div class="cost-result"><span>Custo por <b id="quick-unit-label">unidade</b></span><strong id="quick-result">R$ 0,00</strong><small id="quick-conversion">O cálculo é atualizado automaticamente.</small></div></section>`;
+      `<section class="cost-card"><h2>Calculadora</h2><p>Descubra rapidamente o custo por unidade, peso ou metragem.</p><div class="cost-form-grid"><label>Valor pago (R$)<input id="quick-total" type="number" min="0" step="0.01" placeholder="10,00"></label><label>Quantidade comprada<input id="quick-quantity" type="number" min="0.0001" step="0.0001" placeholder="1"></label><label class="cost-wide">Unidade da compra<select id="quick-unit">${units.map(([value, label]) => `<option value="${value}">${label}</option>`).join("")}</select></label></div><div id="quick-area-fields" class="cost-area-fields hidden"><div><strong>Medida utilizada</strong><small>Informe o tamanho do pedaço que será usado.</small></div><label>Largura (cm)<input id="quick-width" type="number" min="0" step="0.01" placeholder="10"></label><label>Altura (cm)<input id="quick-height" type="number" min="0" step="0.01" placeholder="10"></label></div><div class="cost-result"><span id="quick-result-label">Custo por <b id="quick-unit-label">unidade</b></span><strong id="quick-result">R$ 0,00</strong><small id="quick-conversion">O cálculo é atualizado automaticamente.</small></div></section>`;
     bindTabs(host);
     const calculate = () => {
       const total = Number($("#quick-total").value || 0),
@@ -138,17 +154,32 @@
         unit = $("#quick-unit").value,
         label = $("#quick-unit").selectedOptions[0].text.toLowerCase(),
         unitCost = quantity > 0 ? total / quantity : 0,
-        other = secondaryUnit(unit);
-      $("#quick-unit-label").textContent = label;
-      $("#quick-result").textContent = money(unitCost);
+        other = secondaryUnit(unit),
+        areaMode = isAreaUnit(unit),
+        width = Number($("#quick-width").value || 0),
+        height = Number($("#quick-height").value || 0),
+        areaM2 = (width / 100) * (height / 100),
+        areaInUnit = areaMode ? convertQuantity(areaM2, "m2", unit) : 0,
+        pieceCost = unitCost * areaInUnit;
+      $("#quick-area-fields").classList.toggle("hidden", !areaMode);
+      $("#quick-result-label").innerHTML = areaMode
+        ? `Custo do pedaço de <b>${width || 0} × ${height || 0} cm</b>`
+        : `Custo por <b>${label}</b>`;
+      $("#quick-result").textContent = money(areaMode ? pieceCost : unitCost);
       $("#quick-conversion").textContent =
-        other && quantity > 0
-          ? `${money(unitCost)} por ${unitNames[unit].toLowerCase()} = ${money(unitCost * convertQuantity(1, other, unit))} por ${unitNames[other].toLowerCase()}.`
-          : "O cálculo é atualizado automaticamente.";
+        areaMode && width > 0 && height > 0 && quantity > 0
+          ? `Área usada: ${(width * height).toLocaleString("pt-BR")} cm² (${areaM2.toLocaleString("pt-BR", { maximumFractionDigits: 6 })} m²). Custo do material: ${money(pieceCost)}.`
+          : other && quantity > 0
+            ? `${money(unitCost)} por ${unitNames[unit].toLowerCase()} = ${money(unitCost * convertQuantity(1, other, unit))} por ${unitNames[other].toLowerCase()}.`
+            : "O cálculo é atualizado automaticamente.";
     };
-    ["#quick-total", "#quick-quantity", "#quick-unit"].forEach((id) =>
-      $(id).addEventListener("input", calculate),
-    );
+    [
+      "#quick-total",
+      "#quick-quantity",
+      "#quick-unit",
+      "#quick-width",
+      "#quick-height",
+    ].forEach((id) => $(id).addEventListener("input", calculate));
     calculate();
   }
   function showMaterials() {
@@ -291,17 +322,23 @@
             const selected = materials.find(
                 (material) => material.id === row.material_id,
               ),
-              useUnit = row.usage_unit || selected?.unit || "un";
-            return `<div class="composition-row"><label>Material<select data-material="${index}"><option value="">Selecione</option>${materials.map((material) => `<option value="${material.id}" ${row.material_id === material.id ? "selected" : ""}>${esc(material.name)} — ${money(material.cost_per_unit)}/${esc(unitNames[material.unit] || material.unit)}</option>`).join("")}</select></label><label>Quantidade usada<input data-quantity="${index}" type="number" min="0.0001" step="0.0001" value="${row.quantity || 1}"></label><label>Unidade usada<select data-use-unit="${index}">${compatibleUnits(
-              selected?.unit || useUnit,
-            )
-              .map(
-                ([value, label]) =>
-                  `<option value="${value}" ${useUnit === value ? "selected" : ""}>${label}</option>`,
-              )
-              .join(
-                "",
-              )}</select></label><label>Perda %<input data-waste="${index}" type="number" min="0" max="100" step="0.1" value="${row.waste || 0}"></label><button type="button" class="button secondary" data-remove="${index}">×</button></div>`;
+              useUnit = row.usage_unit || selected?.unit || "un",
+              areaMode = isAreaUnit(selected?.unit),
+              areaCm2 = areaMode
+                ? convertQuantity(row.quantity || 0, useUnit, "cm2")
+                : 0;
+            return `<div class="composition-row ${areaMode ? "area" : ""}"><label>Material<select data-material="${index}"><option value="">Selecione</option>${materials.map((material) => `<option value="${material.id}" ${row.material_id === material.id ? "selected" : ""}>${esc(material.name)} — ${money(material.cost_per_unit)}/${esc(unitNames[material.unit] || material.unit)}</option>`).join("")}</select></label>${
+              areaMode
+                ? `<label>Largura (cm)<input data-area-width="${index}" type="number" min="0" step="0.01" placeholder="10"></label><label>Altura (cm)<input data-area-height="${index}" type="number" min="0" step="0.01" placeholder="10"></label><label>Área usada (cm²)<input data-area="${index}" type="number" min="0.0001" step="0.0001" value="${Number(areaCm2.toFixed(4))}"></label>`
+                : `<label>Quantidade usada<input data-quantity="${index}" type="number" min="0.0001" step="0.0001" value="${row.quantity || 1}"></label><label>Unidade usada<select data-use-unit="${index}">${compatibleUnits(
+                    selected?.unit || useUnit,
+                  )
+                    .map(
+                      ([value, label]) =>
+                        `<option value="${value}" ${useUnit === value ? "selected" : ""}>${label}</option>`,
+                    )
+                    .join("")}</select></label>`
+            }<label>Perda %<input data-waste="${index}" type="number" min="0" max="100" step="0.1" value="${row.waste || 0}"></label><button type="button" class="button secondary" data-remove="${index}">×</button></div>`;
           })
           .join("")
       : '<div class="cost-empty">Adicione os materiais utilizados neste produto.</div>';
@@ -331,6 +368,45 @@
           updateComposition();
         }),
     );
+    box.querySelectorAll("[data-area]").forEach(
+      (input) =>
+        (input.oninput = () => {
+          const row = composition[+input.dataset.area];
+          row.quantity = Number(input.value || 0);
+          row.usage_unit = "cm2";
+          updateComposition();
+        }),
+    );
+    const updateAreaDimensions = (index) => {
+      const width = Number(
+          box.querySelector(`[data-area-width="${index}"]`)?.value || 0,
+        ),
+        height = Number(
+          box.querySelector(`[data-area-height="${index}"]`)?.value || 0,
+        );
+      if (width <= 0 || height <= 0) return;
+      const area = width * height,
+        row = composition[index],
+        areaInput = box.querySelector(`[data-area="${index}"]`);
+      row.quantity = area;
+      row.usage_unit = "cm2";
+      if (areaInput) areaInput.value = Number(area.toFixed(4));
+      updateComposition();
+    };
+    box
+      .querySelectorAll("[data-area-width]")
+      .forEach(
+        (input) =>
+          (input.oninput = () =>
+            updateAreaDimensions(+input.dataset.areaWidth)),
+      );
+    box
+      .querySelectorAll("[data-area-height]")
+      .forEach(
+        (input) =>
+          (input.oninput = () =>
+            updateAreaDimensions(+input.dataset.areaHeight)),
+      );
     box.querySelectorAll("[data-waste]").forEach(
       (input) =>
         (input.oninput = () => {
