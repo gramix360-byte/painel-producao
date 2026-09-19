@@ -179,6 +179,11 @@
 .composition-row.area {
   grid-template-columns: minmax(180px, 1fr) 105px 105px 125px 85px 42px;
 }
+.composition-row.roll {
+  grid-template-columns:
+    minmax(210px, 1fr) 120px 115px 115px 115px 85px
+    42px;
+}
 .cost-area-fields {
   display: grid;
   grid-template-columns: 1fr 150px 150px;
@@ -210,6 +215,9 @@
     grid-template-columns: 1fr;
   }
   .composition-row.area {
+    grid-template-columns: 1fr 1fr;
+  }
+  .composition-row.roll {
     grid-template-columns: 1fr 1fr;
   }
   .cost-area-fields {
