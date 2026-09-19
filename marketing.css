@@ -258,6 +258,69 @@
   width: 100%;
   min-height: 190px;
 }
+.marketing-calendar-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.marketing-upload-modal {
+  width: min(900px, 100%);
+}
+.marketing-upload-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
+  gap: 22px;
+}
+.marketing-upload-box {
+  min-height: 90px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 5px;
+  border: 2px dashed #b8c9df;
+  border-radius: 12px;
+  background: #f7faff;
+  color: #1267f4;
+  cursor: pointer;
+}
+.marketing-upload-box span {
+  font-weight: 800;
+}
+.marketing-upload-box small {
+  color: #718399;
+}
+.marketing-art-preview {
+  min-height: 320px;
+  display: grid;
+  place-items: center;
+  margin-top: 12px;
+  border: 1px solid #dce6ef;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f3f5f8;
+  color: #718399;
+}
+.marketing-art-preview img {
+  display: block;
+  width: 100%;
+  max-height: 500px;
+  object-fit: contain;
+}
+.marketing-upload-form {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+.marketing-upload-form label {
+  margin: 0;
+}
+.marketing-upload-error {
+  min-height: 22px;
+  margin-top: 10px;
+  color: #1267f4;
+  font-size: 12px;
+  font-weight: 700;
+}
 .marketing-editor-status {
   padding: 10px 12px;
   background: #f8faff;
@@ -690,6 +753,15 @@
   }
   .marketing-week {
     grid-template-columns: repeat(7, 150px);
+  }
+  .marketing-upload-grid {
+    grid-template-columns: 1fr;
+  }
+  .marketing-calendar-actions {
+    width: 100%;
+  }
+  .marketing-calendar-actions .button {
+    flex: 1;
   }
   .studio-canvas-wrap {
     padding: 10px;
