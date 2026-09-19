@@ -75,6 +75,12 @@
       ml: "L",
     })[unit] || null;
   const isAreaUnit = (unit) => unit === "m2" || unit === "cm2";
+  const rollWidthFromName = (name = "") => {
+    const match = String(name).match(
+      /(\d+(?:[.,]\d+)?)\s*(?:cm)?\s*[x×]\s*\d+(?:[.,]\d+)?\s*m\b/i,
+    );
+    return match ? Number(match[1].replace(",", ".")) : 0;
+  };
   let materials = [],
     products = [],
     editingMaterial = null,
@@ -324,20 +330,25 @@
               ),
               useUnit = row.usage_unit || selected?.unit || "un",
               areaMode = isAreaUnit(selected?.unit),
+              rollMode = selected?.unit === "m",
               areaCm2 = areaMode
                 ? convertQuantity(row.quantity || 0, useUnit, "cm2")
-                : 0;
-            return `<div class="composition-row ${areaMode ? "area" : ""}"><label>Material<select data-material="${index}"><option value="">Selecione</option>${materials.map((material) => `<option value="${material.id}" ${row.material_id === material.id ? "selected" : ""}>${esc(material.name)} — ${money(material.cost_per_unit)}/${esc(unitNames[material.unit] || material.unit)}</option>`).join("")}</select></label>${
+                : 0,
+              rollWidth =
+                row.roll_width_cm || rollWidthFromName(selected?.name);
+            return `<div class="composition-row ${areaMode ? "area" : ""} ${rollMode ? "roll" : ""}"><label>Material<select data-material="${index}"><option value="">Selecione</option>${materials.map((material) => `<option value="${material.id}" ${row.material_id === material.id ? "selected" : ""}>${esc(material.name)} — ${money(material.cost_per_unit)}/${esc(unitNames[material.unit] || material.unit)}</option>`).join("")}</select></label>${
               areaMode
                 ? `<label>Largura (cm)<input data-area-width="${index}" type="number" min="0" step="0.01" placeholder="10"></label><label>Altura (cm)<input data-area-height="${index}" type="number" min="0" step="0.01" placeholder="10"></label><label>Área usada (cm²)<input data-area="${index}" type="number" min="0.0001" step="0.0001" value="${Number(areaCm2.toFixed(4))}"></label>`
-                : `<label>Quantidade usada<input data-quantity="${index}" type="number" min="0.0001" step="0.0001" value="${row.quantity || 1}"></label><label>Unidade usada<select data-use-unit="${index}">${compatibleUnits(
-                    selected?.unit || useUnit,
-                  )
-                    .map(
-                      ([value, label]) =>
-                        `<option value="${value}" ${useUnit === value ? "selected" : ""}>${label}</option>`,
+                : rollMode
+                  ? `<label>Largura do rolo (cm)<input data-roll-width="${index}" type="number" min="0.01" step="0.01" value="${rollWidth || ""}" placeholder="21,5"></label><label>Largura usada (cm)<input data-roll-piece-width="${index}" type="number" min="0" step="0.01" placeholder="10"></label><label>Altura usada (cm)<input data-roll-piece-height="${index}" type="number" min="0" step="0.01" placeholder="10"></label><label>Consumo (metro)<input data-roll-consumption="${index}" type="number" min="0.000001" step="0.000001" value="${Number(row.quantity || 0).toFixed(6)}"></label>`
+                  : `<label>Quantidade usada<input data-quantity="${index}" type="number" min="0.0001" step="0.0001" value="${row.quantity || 1}"></label><label>Unidade usada<select data-use-unit="${index}">${compatibleUnits(
+                      selected?.unit || useUnit,
                     )
-                    .join("")}</select></label>`
+                      .map(
+                        ([value, label]) =>
+                          `<option value="${value}" ${useUnit === value ? "selected" : ""}>${label}</option>`,
+                      )
+                      .join("")}</select></label>`
             }<label>Perda %<input data-waste="${index}" type="number" min="0" max="100" step="0.1" value="${row.waste || 0}"></label><button type="button" class="button secondary" data-remove="${index}">×</button></div>`;
           })
           .join("")
@@ -407,6 +418,53 @@
           (input.oninput = () =>
             updateAreaDimensions(+input.dataset.areaHeight)),
       );
+    const updateRollDimensions = (index) => {
+      const rollWidth = Number(
+          box.querySelector(`[data-roll-width="${index}"]`)?.value || 0,
+        ),
+        pieceWidth = Number(
+          box.querySelector(`[data-roll-piece-width="${index}"]`)?.value || 0,
+        ),
+        pieceHeight = Number(
+          box.querySelector(`[data-roll-piece-height="${index}"]`)?.value || 0,
+        ),
+        row = composition[index];
+      row.roll_width_cm = rollWidth;
+      if (rollWidth <= 0 || pieceWidth <= 0 || pieceHeight <= 0) return;
+      const linearMeters = (pieceWidth * pieceHeight) / (rollWidth * 100),
+        consumptionInput = box.querySelector(
+          `[data-roll-consumption="${index}"]`,
+        );
+      row.quantity = linearMeters;
+      row.usage_unit = "m";
+      if (consumptionInput)
+        consumptionInput.value = Number(linearMeters.toFixed(6));
+      updateComposition();
+    };
+    box
+      .querySelectorAll(
+        "[data-roll-width],[data-roll-piece-width],[data-roll-piece-height]",
+      )
+      .forEach(
+        (input) =>
+          (input.oninput = () => {
+            const index = Number(
+              input.dataset.rollWidth ??
+                input.dataset.rollPieceWidth ??
+                input.dataset.rollPieceHeight,
+            );
+            updateRollDimensions(index);
+          }),
+      );
+    box.querySelectorAll("[data-roll-consumption]").forEach(
+      (input) =>
+        (input.oninput = () => {
+          const row = composition[+input.dataset.rollConsumption];
+          row.quantity = Number(input.value || 0);
+          row.usage_unit = "m";
+          updateComposition();
+        }),
+    );
     box.querySelectorAll("[data-waste]").forEach(
       (input) =>
         (input.oninput = () => {
