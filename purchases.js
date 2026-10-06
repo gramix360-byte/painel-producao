@@ -37,6 +37,38 @@
       "Content-Type": "application/json",
     };
   }
+  function closeDialog() {
+    document.querySelector(".purchase-modal-backdrop")?.remove();
+  }
+  function openDialog({ title, subtitle = "", content, saveText = "Salvar", onSave }) {
+    closeDialog();
+    const modal = document.createElement("div");
+    modal.className = "purchase-modal-backdrop";
+    modal.innerHTML = `<form class="purchase-modal"><div class="purchase-modal-head"><div><h2>${esc(title)}</h2>${subtitle ? `<p>${esc(subtitle)}</p>` : ""}</div><button type="button" class="purchase-modal-close" aria-label="Fechar">×</button></div><div class="purchase-modal-body">${content}</div><div class="purchase-modal-actions"><button type="button" class="button secondary purchase-modal-cancel">Cancelar</button><button type="submit" class="button primary purchase-modal-save">${esc(saveText)}</button></div></form>`;
+    document.body.appendChild(modal);
+    const form = modal.querySelector("form");
+    modal.querySelectorAll(".purchase-modal-close,.purchase-modal-cancel").forEach((button) => (button.onclick = closeDialog));
+    modal.onclick = (event) => { if (event.target === modal) closeDialog(); };
+    form.onsubmit = async (event) => {
+      event.preventDefault();
+      const button = modal.querySelector(".purchase-modal-save");
+      button.disabled = true;
+      button.textContent = "Salvando...";
+      try {
+        const done = await onSave(new FormData(form), form);
+        if (done !== false) closeDialog();
+      } catch (error) {
+        console.error(error);
+        alert(error.message || "Não foi possível concluir esta ação.");
+      } finally {
+        if (document.body.contains(button)) {
+          button.disabled = false;
+          button.textContent = saveText;
+        }
+      }
+    };
+    return form;
+  }
   async function loadProducts() {
     const r = await fetch(
       `${window.PPAuth.url}/rest/v1/products?select=id,name,sku,stock,cost_price&deleted_at=is.null&active=eq.true&order=name.asc`,
@@ -176,41 +208,37 @@
     );
   }
   async function addSupplier() {
-    const name = prompt("Nome do fornecedor:");
-    if (!name) return;
-    const contact = prompt("Contato (telefone, e-mail ou WhatsApp):") || "";
-    const r = await fetch(`${window.PPAuth.url}/rest/v1/suppliers`, {
-      method: "POST",
-      headers: { ...(await headers()), Prefer: "return=minimal" },
-      body: JSON.stringify({
-        name: name.trim(),
-        contact: contact.trim() || null,
-        active: true,
-      }),
+    openDialog({
+      title: "Novo fornecedor",
+      subtitle: "Cadastre o fornecedor para usar nas próximas compras.",
+      saveText: "Cadastrar fornecedor",
+      content: `<div class="purchase-form-grid"><label class="purchase-field purchase-span-2"><span>Nome do fornecedor *</span><input name="name" required autofocus placeholder="Ex.: Distribuidora de materiais"></label><label class="purchase-field purchase-span-2"><span>Contato</span><input name="contact" placeholder="Telefone, WhatsApp ou e-mail"></label></div>`,
+      onSave: async (data) => {
+        const name = String(data.get("name") || "").trim();
+        const contact = String(data.get("contact") || "").trim();
+        if (!name) return false;
+        const r = await fetch(`${window.PPAuth.url}/rest/v1/suppliers`, { method: "POST", headers: { ...(await headers()), Prefer: "return=minimal" }, body: JSON.stringify({ name, contact: contact || null, active: true }) });
+        if (!r.ok) throw new Error("Não foi possível cadastrar o fornecedor.");
+        await loadData();
+      },
     });
-    if (!r.ok) return alert("Não foi possível cadastrar o fornecedor.");
-    await loadData();
   }
   async function editSupplier(id) {
     const x = suppliers.find((s) => s.id === id);
     if (!x) return;
-    const name = prompt("Nome do fornecedor:", x.name);
-    if (!name) return;
-    const contact = prompt("Contato:", x.contact || "");
-    const r = await fetch(
-      `${window.PPAuth.url}/rest/v1/suppliers?id=eq.${encodeURIComponent(id)}`,
-      {
-        method: "PATCH",
-        headers: { ...(await headers()), Prefer: "return=minimal" },
-        body: JSON.stringify({
-          name: name.trim(),
-          contact: (contact || "").trim() || null,
-          updated_at: new Date().toISOString(),
-        }),
+    openDialog({
+      title: "Editar fornecedor",
+      saveText: "Salvar alterações",
+      content: `<div class="purchase-form-grid"><label class="purchase-field purchase-span-2"><span>Nome do fornecedor *</span><input name="name" required value="${esc(x.name)}"></label><label class="purchase-field purchase-span-2"><span>Contato</span><input name="contact" value="${esc(x.contact || "")}"></label></div>`,
+      onSave: async (data) => {
+        const name = String(data.get("name") || "").trim();
+        const contact = String(data.get("contact") || "").trim();
+        if (!name) return false;
+        const r = await fetch(`${window.PPAuth.url}/rest/v1/suppliers?id=eq.${encodeURIComponent(id)}`, { method: "PATCH", headers: { ...(await headers()), Prefer: "return=minimal" }, body: JSON.stringify({ name, contact: contact || null, updated_at: new Date().toISOString() }) });
+        if (!r.ok) throw new Error("Não foi possível editar o fornecedor.");
+        await loadData();
       },
-    );
-    if (!r.ok) return alert("Não foi possível editar o fornecedor.");
-    await loadData();
+    });
   }
   async function deleteSupplier(id) {
     const x = suppliers.find((s) => s.id === id);
@@ -229,82 +257,50 @@
     if (!r.ok) return alert("Não foi possível desativar o fornecedor.");
     await loadData();
   }
-  async function addPurchase() {
+  async function addPurchase(selectedProductId = "") {
     try {
       if (!products.length) await loadProducts();
     } catch {
       return alert("Não foi possível carregar os produtos.");
     }
     if (!suppliers.length) return alert("Cadastre um fornecedor primeiro.");
-    const supplierName = prompt(
-      `Fornecedor:\n${suppliers.map((s) => s.name).join("\n")}`,
-    );
-    if (!supplierName) return;
-    const supplier =
-      suppliers.find(
-        (s) => s.name.toLowerCase() === supplierName.trim().toLowerCase(),
-      ) ||
-      suppliers.find((s) =>
-        s.name.toLowerCase().includes(supplierName.trim().toLowerCase()),
-      );
-    if (!supplier) return alert("Fornecedor não encontrado.");
-    const term = prompt("Digite o nome ou SKU do produto cadastrado:");
-    if (!term) return;
-    const q = term.toLowerCase().trim(),
-      p =
-        products.find((v) => String(v.sku || "").toLowerCase() === q) ||
-        products.find((v) =>
-          String(v.name || "")
-            .toLowerCase()
-            .includes(q),
-        );
-    if (!p) return alert("Produto não encontrado.");
-    const quantity = Number(prompt(`Quantidade de ${p.name}:`) || 0);
-    if (quantity <= 0) return;
-    const unit_cost = Number(
-      String(
-        prompt(
-          `Custo unitário (R$) — atual ${Number(p.cost_price || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}:`,
-        ) || "0",
-      ).replace(",", "."),
-    );
-    if (unit_cost < 0) return;
-    const due =
-        prompt(
-          "Vencimento da conta (AAAA-MM-DD). Deixe vazio se não houver:",
-        ) || "",
-      method =
-        prompt(
-          "Forma de pagamento (PIX, Boleto, Cartão, Transferência etc.):",
-        ) || "";
-    const x = {
-      supplier_id: supplier.id,
-      supplier_name: supplier.name,
-      product_id: p.id,
-      product_name: p.name,
-      sku: p.sku || null,
-      quantity,
-      unit_cost,
-      total_amount: quantity * unit_cost,
-      due_date: /^\d{4}-\d{2}-\d{2}$/.test(due) ? due : null,
-      payment_method: method || null,
-      status: "aguardando",
+    const chosen = products.find((p) => String(p.id) === String(selectedProductId));
+    const form = openDialog({
+      title: "Solicitar compra",
+      subtitle: "Informe tudo em uma única tela. O total é calculado automaticamente.",
+      saveText: "Criar pedido de compra",
+      content: `<div class="purchase-form-grid"><label class="purchase-field purchase-span-2"><span>Produto *</span><select name="product_id" required><option value="">Selecione o produto</option>${products.map((p) => `<option value="${p.id}" ${chosen?.id === p.id ? "selected" : ""}>${esc(p.name)}${p.sku ? ` · ${esc(p.sku)}` : ""}</option>`).join("")}</select></label><div class="purchase-product-summary purchase-span-2"><div><small>Estoque atual</small><strong data-current-stock>—</strong></div><div><small>Custo atual</small><strong data-current-cost>—</strong></div><div><small>SKU</small><strong data-current-sku>—</strong></div></div><label class="purchase-field purchase-span-2"><span>Fornecedor *</span><select name="supplier_id" required><option value="">Selecione o fornecedor</option>${suppliers.map((s) => `<option value="${s.id}">${esc(s.name)}</option>`).join("")}</select></label><label class="purchase-field"><span>Quantidade *</span><input name="quantity" type="number" min="0.01" step="0.01" value="1" required></label><label class="purchase-field"><span>Custo unitário *</span><div class="purchase-money-input"><span>R$</span><input name="unit_cost" type="number" min="0" step="0.01" value="0" required></div></label><label class="purchase-field"><span>Previsão de pagamento</span><input name="due_date" type="date"></label><label class="purchase-field"><span>Forma de pagamento</span><select name="payment_method"><option value="">Selecione</option><option>PIX</option><option>Boleto</option><option>Cartão de crédito</option><option>Cartão de débito</option><option>Transferência</option><option>Dinheiro</option><option>Outro</option></select></label><div class="purchase-total purchase-span-2"><span>Total da compra</span><strong data-purchase-total>R$ 0,00</strong></div></div>`,
+      onSave: async (data) => {
+        const p = products.find((item) => String(item.id) === String(data.get("product_id")));
+        const supplier = suppliers.find((item) => String(item.id) === String(data.get("supplier_id")));
+        const quantity = Number(data.get("quantity") || 0);
+        const unit_cost = Number(data.get("unit_cost") || 0);
+        if (!p || !supplier || quantity <= 0 || unit_cost < 0) throw new Error("Confira o produto, o fornecedor, a quantidade e o custo.");
+        const x = { supplier_id: supplier.id, supplier_name: supplier.name, product_id: p.id, product_name: p.name, sku: p.sku || null, quantity, unit_cost, total_amount: quantity * unit_cost, due_date: String(data.get("due_date") || "") || null, payment_method: String(data.get("payment_method") || "") || null, status: "aguardando" };
+        x.finance_id = await createPayable(x);
+        const r = await fetch(`${window.PPAuth.url}/rest/v1/purchases`, { method: "POST", headers: { ...(await headers()), Prefer: "return=minimal" }, body: JSON.stringify(x) });
+        if (!r.ok) throw new Error(await r.text());
+        window.PPFinance?.refresh?.();
+        await loadData();
+        alert("Pedido de compra criado e conta a pagar gerada no Financeiro.");
+      },
+    });
+    const productSelect = form.elements.product_id;
+    const quantityInput = form.elements.quantity;
+    const costInput = form.elements.unit_cost;
+    const updateTotal = () => { form.querySelector("[data-purchase-total]").textContent = money(Number(quantityInput.value || 0) * Number(costInput.value || 0)); };
+    const updateProduct = () => {
+      const p = products.find((item) => String(item.id) === String(productSelect.value));
+      form.querySelector("[data-current-stock]").textContent = p ? Number(p.stock || 0) : "—";
+      form.querySelector("[data-current-cost]").textContent = p ? money(p.cost_price) : "—";
+      form.querySelector("[data-current-sku]").textContent = p?.sku || "—";
+      if (p) costInput.value = Number(p.cost_price || 0).toFixed(2);
+      updateTotal();
     };
-    try {
-      x.finance_id = await createPayable(x);
-      const r = await fetch(`${window.PPAuth.url}/rest/v1/purchases`, {
-        method: "POST",
-        headers: { ...(await headers()), Prefer: "return=minimal" },
-        body: JSON.stringify(x),
-      });
-      if (!r.ok) throw new Error(await r.text());
-      window.PPFinance?.refresh?.();
-      await loadData();
-      alert("Pedido de compra criado e conta a pagar gerada no Financeiro.");
-    } catch (e) {
-      console.error(e);
-      alert("Não foi possível criar a compra.");
-    }
+    productSelect.onchange = updateProduct;
+    quantityInput.oninput = updateTotal;
+    costInput.oninput = updateTotal;
+    updateProduct();
   }
   async function editPurchase(id) {
     const x = purchases.find((p) => p.id === id);
@@ -314,41 +310,26 @@
         "Compras já recebidas ficam bloqueadas para edição para preservar o estoque e o histórico.",
       );
     if (x.status === "cancelado") return alert("Esta compra foi cancelada.");
-    const qty = Number(prompt("Quantidade:", x.quantity));
-    if (!qty || qty <= 0) return;
-    const cost = Number(
-      String(
-        prompt(
-          "Custo unitário:",
-          Number(x.unit_cost || 0)
-            .toFixed(2)
-            .replace(".", ","),
-        ) || "",
-      ).replace(",", "."),
-    );
-    if (cost < 0 || Number.isNaN(cost)) return;
-    const due = prompt("Vencimento (AAAA-MM-DD):", x.due_date || "") || "",
-      method = prompt("Forma de pagamento:", x.payment_method || "") || "";
-    const body = {
-      quantity: qty,
-      unit_cost: cost,
-      total_amount: qty * cost,
-      due_date: /^\d{4}-\d{2}-\d{2}$/.test(due) ? due : null,
-      payment_method: method || null,
-      updated_at: new Date().toISOString(),
-    };
-    const r = await fetch(
-      `${window.PPAuth.url}/rest/v1/purchases?id=eq.${encodeURIComponent(id)}`,
-      {
-        method: "PATCH",
-        headers: { ...(await headers()), Prefer: "return=minimal" },
-        body: JSON.stringify(body),
+    const methods = ["", "PIX", "Boleto", "Cartão de crédito", "Cartão de débito", "Transferência", "Dinheiro", "Outro"];
+    const form = openDialog({
+      title: "Editar pedido de compra",
+      subtitle: `${x.product_name} · ${x.supplier_name}`,
+      saveText: "Salvar alterações",
+      content: `<div class="purchase-form-grid"><label class="purchase-field"><span>Quantidade *</span><input name="quantity" type="number" min="0.01" step="0.01" value="${Number(x.quantity || 0)}" required></label><label class="purchase-field"><span>Custo unitário *</span><div class="purchase-money-input"><span>R$</span><input name="unit_cost" type="number" min="0" step="0.01" value="${Number(x.unit_cost || 0).toFixed(2)}" required></div></label><label class="purchase-field"><span>Previsão de pagamento</span><input name="due_date" type="date" value="${esc(x.due_date || "")}"></label><label class="purchase-field"><span>Forma de pagamento</span><select name="payment_method">${methods.map((m) => `<option value="${esc(m)}" ${m === (x.payment_method || "") ? "selected" : ""}>${m || "Selecione"}</option>`).join("")}</select></label><div class="purchase-total purchase-span-2"><span>Total da compra</span><strong data-purchase-total>${money(x.total_amount)}</strong></div></div>`,
+      onSave: async (data) => {
+        const qty = Number(data.get("quantity") || 0), cost = Number(data.get("unit_cost") || 0);
+        if (qty <= 0 || cost < 0) throw new Error("Confira a quantidade e o custo.");
+        const body = { quantity: qty, unit_cost: cost, total_amount: qty * cost, due_date: String(data.get("due_date") || "") || null, payment_method: String(data.get("payment_method") || "") || null, updated_at: new Date().toISOString() };
+        const r = await fetch(`${window.PPAuth.url}/rest/v1/purchases?id=eq.${encodeURIComponent(id)}`, { method: "PATCH", headers: { ...(await headers()), Prefer: "return=minimal" }, body: JSON.stringify(body) });
+        if (!r.ok) throw new Error("Não foi possível editar a compra.");
+        await updatePayable({ ...x, ...body });
+        window.PPFinance?.refresh?.();
+        await loadData();
       },
-    );
-    if (!r.ok) return alert("Não foi possível editar a compra.");
-    await updatePayable({ ...x, ...body });
-    window.PPFinance?.refresh?.();
-    await loadData();
+    });
+    const update = () => { form.querySelector("[data-purchase-total]").textContent = money(Number(form.elements.quantity.value || 0) * Number(form.elements.unit_cost.value || 0)); };
+    form.elements.quantity.oninput = update;
+    form.elements.unit_cost.oninput = update;
   }
   async function cancelPurchase(id) {
     const x = purchases.find((p) => p.id === id);
@@ -475,7 +456,7 @@
         .includes(q)
     );
   }
-  function render() {
+  function renderLegacy() {
     const host = document.getElementById("view-compras");
     if (!host) return;
     const open = purchases.filter((x) => x.status === "aguardando"),
@@ -555,6 +536,41 @@
         }),
     );
   }
+  function render() {
+    const host = document.getElementById("view-compras");
+    if (!host) return;
+    const openPurchases = purchases.filter((x) => x.status === "aguardando");
+    const received = purchases.filter((x) => x.status === "recebido");
+    const late = openPurchases.filter((x) => state(x) === "atrasado");
+    const pendingValue = openPurchases.reduce((sum, x) => sum + Number(x.total_amount || 0), 0);
+    const q = search.toLowerCase().trim();
+    const productRows = products.filter((p) => !q || `${p.name} ${p.sku || ""}`.toLowerCase().includes(q));
+    const purchaseRows = purchases.filter(visible);
+    host.innerHTML = `<div class="purchase-page">
+      <header class="purchase-head purchase-hero"><div><span class="purchase-eyebrow">BRINDE ON</span><h2>Gestão de Compras</h2><p>Reposição de estoque, fornecedores e contas a pagar em um único lugar.</p></div><div><button class="button secondary" id="new-supplier">+ Fornecedor</button><button class="button primary" id="new-purchase">+ Pedido de compra</button></div></header>
+      <div class="purchase-kpis"><div><small>Fornecedores ativos</small><strong>${suppliers.length}</strong><span>cadastrados</span></div><div><small>Compras abertas</small><strong>${openPurchases.length}</strong><span>aguardando recebimento</span></div><div><small>Compras atrasadas</small><strong class="${late.length ? "purchase-danger" : ""}">${late.length}</strong><span>fora do prazo</span></div><div><small>Mercadoria a receber</small><strong>${money(pendingValue)}</strong><span>valor dos pedidos abertos</span></div></div>
+      <section class="purchase-panel purchase-catalog"><div class="purchase-panel-head"><div><h3>Produtos para compra</h3><p>Localize um produto e clique em Solicitar compra.</p></div><span>${productRows.length} produto(s)</span></div><div class="purchase-toolbar purchase-toolbar-modern"><input id="purchase-search" placeholder="Buscar produto ou SKU" value="${esc(search)}"><select id="purchase-filter"><option value="todos" ${filter === "todos" ? "selected" : ""}>Todas as compras</option><option value="aguardando" ${filter === "aguardando" ? "selected" : ""}>Aguardando</option><option value="atrasado" ${filter === "atrasado" ? "selected" : ""}>Atrasadas</option><option value="recebido" ${filter === "recebido" ? "selected" : ""}>Recebidas</option><option value="cancelado" ${filter === "cancelado" ? "selected" : ""}>Canceladas</option></select></div><div class="purchase-product-table"><div class="purchase-product-row purchase-product-labels"><span>Produto</span><span>Estoque</span><span>Custo atual</span><span></span></div>${productRows.length ? productRows.map((p) => { const stock = Number(p.stock || 0); return `<article class="purchase-product-row"><div><b>${esc(p.name)}</b><small>${p.sku ? `SKU ${esc(p.sku)}` : "Sem SKU"}</small></div><strong class="${stock <= 0 ? "purchase-danger" : ""}">${stock}</strong><strong>${money(p.cost_price)}</strong><button class="button primary" data-request-product="${p.id}">Solicitar compra</button></article>`; }).join("") : '<div class="purchase-empty">Nenhum produto encontrado.</div>'}</div></section>
+      <div class="purchase-grid purchase-management-grid"><section class="purchase-panel"><div class="purchase-panel-head"><div><h3>Pedidos de compra</h3><p>Acompanhe até o recebimento.</p></div><span>${purchaseRows.length}</span></div>${purchaseRows.length ? purchaseRows.map((x) => { const st = state(x); return `<article class="purchase-card"><div><b>${esc(x.product_name)}</b><small>${esc(x.supplier_name)} · ${Number(x.quantity)} un.${x.sku ? ` · ${esc(x.sku)}` : ""}</small><small>Criado em ${date(x.created_at)}</small></div><div><strong>${money(x.total_amount)}</strong><span class="${st}">${st === "recebido" ? "Recebido" : st === "cancelado" ? "Cancelado" : st === "atrasado" ? "Atrasado" : "Aguardando"}</span><small>${x.due_date ? `Vence ${date(x.due_date)}` : "Sem vencimento"}</small></div><div class="purchase-actions">${x.status === "aguardando" ? `<button data-receive="${x.id}" class="button primary">Receber</button><button data-edit-purchase="${x.id}" class="button secondary">Editar</button><button data-cancel-purchase="${x.id}" class="button secondary">Cancelar</button>` : ""}<button data-delete-purchase="${x.id}" class="button danger">Excluir</button></div></article>`; }).join("") : '<div class="purchase-empty">Nenhuma compra encontrada.</div>'}</section>
+      <section class="purchase-panel"><div class="purchase-panel-head"><div><h3>Fornecedores</h3><p>Contatos usados nas compras.</p></div><span>${suppliers.length}</span></div>${suppliers.length ? suppliers.map((x) => `<article class="supplier-card"><div><b>${esc(x.name)}</b><small>${esc(x.contact || "Sem contato")}</small></div><div class="supplier-actions"><button data-edit-supplier="${x.id}" class="button secondary">Editar</button><button data-delete-supplier="${x.id}" class="button danger">Excluir</button></div></article>`).join("") : '<div class="purchase-empty">Cadastre seu primeiro fornecedor.</div>'}<div class="purchase-history"><h3>Últimos recebimentos</h3>${received.length ? received.slice(0, 6).map((x) => `<div><span>${date(x.received_at)}</span><b>${esc(x.product_name)}</b><small>${Number(x.quantity)} un. · ${esc(x.supplier_name)}</small></div>`).join("") : '<div class="purchase-empty">Nenhum recebimento registrado.</div>'}</div></section></div>
+    </div>`;
+    host.querySelector("#new-supplier").onclick = addSupplier;
+    host.querySelector("#new-purchase").onclick = () => addPurchase();
+    host.querySelector("#purchase-search").oninput = (event) => { search = event.target.value; render(); const input = host.querySelector("#purchase-search"); input?.focus(); input?.setSelectionRange(search.length, search.length); };
+    host.querySelector("#purchase-filter").onchange = (event) => { filter = event.target.value; render(); };
+    host.querySelectorAll("[data-request-product]").forEach((button) => (button.onclick = () => addPurchase(button.dataset.requestProduct)));
+    host.querySelectorAll("[data-edit-supplier]").forEach((button) => (button.onclick = () => editSupplier(button.dataset.editSupplier)));
+    host.querySelectorAll("[data-delete-supplier]").forEach((button) => (button.onclick = () => deleteSupplier(button.dataset.deleteSupplier)));
+    host.querySelectorAll("[data-edit-purchase]").forEach((button) => (button.onclick = () => editPurchase(button.dataset.editPurchase)));
+    host.querySelectorAll("[data-cancel-purchase]").forEach((button) => (button.onclick = () => cancelPurchase(button.dataset.cancelPurchase)));
+    host.querySelectorAll("[data-delete-purchase]").forEach((button) => (button.onclick = () => deletePurchase(button.dataset.deletePurchase)));
+    host.querySelectorAll("[data-receive]").forEach((button) => (button.onclick = async () => {
+      const item = purchases.find((x) => x.id === button.dataset.receive);
+      if (!item || !confirm(`Confirmar o recebimento de ${Number(item.quantity)} unidade(s) de ${item.product_name}?`)) return;
+      button.disabled = true; button.textContent = "Recebendo...";
+      try { await receivePurchase(item); alert("Compra recebida e estoque atualizado."); }
+      catch (error) { console.error(error); alert(error.message || "Não foi possível receber a compra."); button.disabled = false; button.textContent = "Receber"; }
+    }));
+  }
   async function open() {
     document
       .querySelectorAll(".view")
@@ -569,6 +585,7 @@
       "Fornecedores, pedidos de compra e contas a pagar";
     try {
       await Promise.all([loadProducts(), loadData()]);
+      render();
     } catch (e) {
       console.error(e);
       alert("Não foi possível carregar Compras.");
