@@ -1,25 +1,149 @@
-(()=>{
-  const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const fmt=v=>{if(!v)return 'Sem prazo';const [y,m,d]=v.split('-');return `${d}/${m}/${y}`};
-  const labels={pedido_recebido:'Pedido recebido',aguardando_arte:'Aguardando arte',arte_em_criacao:'Arte em criação',aguardando_aprovacao:'Aguardando aprovação',arte_aprovada:'Arte aprovada',em_producao:'Em produção',finalizado:'Finalizado'};
+(() => {
+  const esc = (value = "") => String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+  const fmt = (value) => {
+    if (!value) return "Sem prazo";
+    const [year, month, day] = value.split("-");
+    return `${day}/${month}/${year}`;
+  };
+  const labels = {
+    pedido_recebido: "Pedido recebido",
+    aguardando_arte: "Aguardando arte",
+    arte_em_criacao: "Criando arte",
+    aguardando_aprovacao: "Aguardando aprovação do cliente",
+    arte_aprovada: "Arte aprovada — pronta para produção",
+    em_producao: "Em produção",
+    embalado: "Embalado",
+    expedicao: "Enviado",
+    entregue: "Entregue",
+  };
 
-  async function headers(){const session=await window.PPAuth?.getSession();if(!session?.access_token)throw new Error('Sessão expirada');return{apikey:window.PPAuth.key,Authorization:`Bearer ${session.access_token}`,'Content-Type':'application/json'}}
-  async function patch(orderId,phase,status='aguardando'){
-    const h=await headers(),now=new Date().toISOString(),body={phase,status,updated_at:now};
-    if(status==='em_producao')body.started_at=now;
-    if(status==='finalizado')body.finished_at=now;
-    const r=await fetch(`${window.PPAuth.url}/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}`,{method:'PATCH',headers:{...h,Prefer:'return=minimal'},body:JSON.stringify(body)});
-    if(!r.ok)throw new Error(await r.text());
-    try{const req=indexedDB.open('painel-producao-db',1);await new Promise((res,rej)=>{req.onsuccess=res;req.onerror=()=>rej(req.error)});const db=req.result,tx=db.transaction('orders','readwrite'),st=tx.objectStore('orders'),g=st.get(orderId);await new Promise((res,rej)=>{g.onsuccess=res;g.onerror=()=>rej(g.error)});if(g.result){const o=g.result;o.phase=phase;o.status=status;o.updated_at=now;if(status==='em_producao')o.started_at=now;if(status==='finalizado')o.finished_at=now;st.put(o)}await new Promise((res,rej)=>{tx.oncomplete=res;tx.onerror=()=>rej(tx.error)});db.close()}catch(e){console.warn('Fase local não atualizada',e)}
-    if('BroadcastChannel'in window){const ch=new BroadcastChannel('painel-producao-updates');ch.postMessage({type:'changed'});ch.close()}
+  async function headers() {
+    const session = await window.PPAuth?.getSession();
+    if (!session?.access_token) throw new Error("Sessão expirada");
+    return { apikey: window.PPAuth.key, Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" };
+  }
+
+  async function updateLocal(orderId, phase, status, now) {
+    try {
+      const request = indexedDB.open("painel-producao-db", 1);
+      await new Promise((resolve, reject) => {
+        request.onsuccess = resolve;
+        request.onerror = () => reject(request.error);
+      });
+      const db = request.result;
+      const transaction = db.transaction("orders", "readwrite");
+      const store = transaction.objectStore("orders");
+      const get = store.get(orderId);
+      await new Promise((resolve, reject) => {
+        get.onsuccess = resolve;
+        get.onerror = () => reject(get.error);
+      });
+      if (get.result) {
+        const order = get.result;
+        Object.assign(order, { phase, status, updated_at: now });
+        if (phase === "em_producao") order.started_at ||= now;
+        if (phase === "embalado") order.finished_at ||= now;
+        store.put(order);
+      }
+      await new Promise((resolve, reject) => {
+        transaction.oncomplete = resolve;
+        transaction.onerror = () => reject(transaction.error);
+      });
+      db.close();
+    } catch (error) {
+      console.warn("Fase local não atualizada", error);
+    }
+  }
+
+  async function patch(orderId, phase, status = "aguardando") {
+    const authHeaders = await headers();
+    const now = new Date().toISOString();
+    const body = { phase, status, updated_at: now };
+    if (phase === "em_producao") body.started_at = now;
+    if (phase === "embalado") body.finished_at = now;
+    const response = await fetch(`${window.PPAuth.url}/rest/v1/orders?id=eq.${encodeURIComponent(orderId)}`, {
+      method: "PATCH",
+      headers: { ...authHeaders, Prefer: "return=minimal" },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) throw new Error(await response.text());
+    await updateLocal(orderId, phase, status, now);
+    if ("BroadcastChannel" in window) {
+      const channel = new BroadcastChannel("painel-producao-updates");
+      channel.postMessage({ type: "changed" });
+      channel.close();
+    }
     window.PPPhases?.refresh?.();
   }
-  async function patchPhaseToFinalized(orderId){try{await patch(orderId,'finalizado','finalizado')}catch(e){console.error('Falha ao finalizar fase',e)}}
-  function nextAction(o){const p=o.phase||'pedido_recebido';if(p==='pedido_recebido')return{phase:'aguardando_arte',label:'Enviar para arte'};if(p==='aguardando_arte')return{phase:'arte_em_criacao',label:'Iniciar arte'};if(p==='arte_em_criacao')return{phase:'aguardando_aprovacao',label:'Enviar para aprovação'};if(p==='aguardando_aprovacao')return{phase:'arte_aprovada',label:'Marcar arte aprovada'};if(p==='arte_aprovada')return{phase:'em_producao',label:'Iniciar produção',status:'em_producao'};return null}
-  function preCard(o){const items=(o.order_items||[]).map(i=>`<li><span class="qty">${esc(i.quantity)}</span><div><div class="item-name">${esc(i.product_name)}</div>${i.personalization?`<div class="personalization">${esc(i.personalization)}</div>`:''}</div></li>`).join(''),act=nextAction(o),phase=o.phase||'pedido_recebido';return `<article class="order-card ${o.priority==='urgente'?'urgent':''}"><div class="order-card-head"><div><div class="order-number">#${esc(o.order_number)}</div><div class="customer">${esc(o.customer_name)}</div></div><div class="meta"><span class="badge ${esc(o.priority)}">${o.priority==='urgente'?'URGENTE':'Normal'}</span><div>Prazo: ${fmt(o.due_date)}</div></div></div><div class="approval-note">${esc(labels[phase]||phase)}</div><ul class="order-items">${items}</ul>${o.notes?`<div class="order-notes"><strong>Obs.:</strong> ${esc(o.notes)}</div>`:''}${act?`<div class="order-actions"><button class="button primary preproduction-action" data-id="${esc(o.id)}" data-phase="${act.phase}" data-status="${act.status||'aguardando'}">${esc(act.label)}</button></div>`:''}</article>`}
-  async function renderPreProduction(){const view=document.getElementById('view-producao');if(!view?.classList.contains('active'))return;const columns=view.querySelector('.production-columns');if(!columns)return;const first=columns.children[0];if(!first)return;try{const h=await headers(),phases='pedido_recebido,aguardando_arte,arte_em_criacao,aguardando_aprovacao,arte_aprovada',r=await fetch(`${window.PPAuth.url}/rest/v1/orders?select=*,order_items(*)&phase=in.(${phases})&order=created_at.asc`,{headers:h});if(!r.ok)throw new Error(await r.text());const rows=await r.json();rows.sort((a,b)=>{if(a.priority!==b.priority)return a.priority==='urgente'?-1:1;return(a.due_date||'9999').localeCompare(b.due_date||'9999')});first.innerHTML=`<div class="column-title"><h2>Aguardando produção</h2><strong>${rows.length}</strong></div>${rows.length?rows.map(preCard).join(''):'<div class="empty">Nenhum pedido aguardando produção.</div>'}`;first.querySelectorAll('.preproduction-action').forEach(btn=>btn.onclick=async()=>{btn.disabled=true;const old=btn.textContent;btn.textContent='Atualizando...';try{await patch(btn.dataset.id,btn.dataset.phase,btn.dataset.status);setTimeout(renderPreProduction,100);if(btn.dataset.phase==='em_producao')document.querySelector('.nav-item[data-view="producao"]')?.click()}catch(e){console.error(e);alert('Não foi possível avançar o pedido.');btn.disabled=false;btn.textContent=old}})}catch(e){console.error('Falha ao carregar pré-produção',e)}}
-  document.addEventListener('click',event=>{const btn=event.target.closest('.status-action[data-status="finalizado"]');if(btn)setTimeout(()=>patchPhaseToFinalized(btn.dataset.id),250);if(event.target.closest('.nav-item[data-view="producao"]'))setTimeout(renderPreProduction,250)},true);
-  const observer=new MutationObserver(()=>setTimeout(renderPreProduction,80));
-  document.addEventListener('DOMContentLoaded',()=>{const view=document.getElementById('view-producao');if(view)observer.observe(view,{childList:true,subtree:false});setInterval(renderPreProduction,4000)});
-  window.KodaProductionFlow={refresh:renderPreProduction,advance:patch};
+
+  function nextAction(order) {
+    const phase = order.phase || "pedido_recebido";
+    if (["pedido_recebido", "aguardando_arte"].includes(phase)) return { phase: "arte_em_criacao", label: "Iniciar criação da arte" };
+    if (phase === "arte_em_criacao") return { artwork: true, label: "Enviar prévia ao cliente" };
+    if (phase === "aguardando_aprovacao") return { artwork: true, label: "Ver aprovação da arte" };
+    if (phase === "arte_aprovada") return { phase: "em_producao", status: "em_producao", label: "Iniciar produção" };
+    return null;
+  }
+
+  function card(order) {
+    const items = (order.order_items || []).map((item) => `<li><span class="qty">${esc(item.quantity)}</span><div><div class="item-name">${esc(item.product_name)}</div>${item.personalization ? `<div class="personalization">${esc(item.personalization)}</div>` : ""}</div></li>`).join("");
+    const action = nextAction(order);
+    const phase = order.phase || "pedido_recebido";
+    const actionData = action?.artwork
+      ? `data-artwork="1" data-order="${esc(order.order_number)}"`
+      : `data-id="${esc(order.id)}" data-phase="${esc(action?.phase || "")}" data-status="${esc(action?.status || "aguardando")}"`;
+    return `<article class="order-card ${order.priority === "urgente" ? "urgent" : ""}"><div class="order-card-head"><div><div class="order-number">#${esc(order.order_number)}</div><div class="customer">${esc(order.customer_name)}</div></div><div class="meta"><span class="badge ${esc(order.priority)}">${order.priority === "urgente" ? "URGENTE" : "Normal"}</span><div>Prazo: ${fmt(order.due_date)}</div></div></div><div class="approval-note">${esc(labels[phase] || phase)}</div><ul class="order-items">${items}</ul>${order.notes ? `<div class="order-notes"><strong>Obs.:</strong> ${esc(order.notes)}</div>` : ""}${action ? `<div class="order-actions"><button class="button primary preproduction-action" ${actionData}>${esc(action.label)}</button></div>` : ""}</article>`;
+  }
+
+  async function render() {
+    const view = document.getElementById("view-producao");
+    if (!view?.classList.contains("active")) return;
+    const firstColumn = view.querySelector(".production-columns")?.children?.[0];
+    if (!firstColumn) return;
+    try {
+      const authHeaders = await headers();
+      const phases = "pedido_recebido,aguardando_arte,arte_em_criacao,aguardando_aprovacao,arte_aprovada";
+      const response = await fetch(`${window.PPAuth.url}/rest/v1/orders?select=*,order_items(*)&phase=in.(${phases})&deleted_at=is.null&order=created_at.asc`, { headers: authHeaders });
+      if (!response.ok) throw new Error(await response.text());
+      const orders = await response.json();
+      orders.sort((a, b) => a.priority !== b.priority ? (a.priority === "urgente" ? -1 : 1) : (a.due_date || "9999").localeCompare(b.due_date || "9999"));
+      firstColumn.innerHTML = `<div class="column-title"><h2>Arte e preparação</h2><strong>${orders.length}</strong></div>${orders.length ? orders.map(card).join("") : '<div class="empty">Nenhum pedido aguardando arte ou produção.</div>'}`;
+      firstColumn.querySelectorAll(".preproduction-action").forEach((button) => {
+        button.onclick = async () => {
+          if (button.dataset.artwork === "1") {
+            window.KodaArtworkApproval?.open?.(button.dataset.order);
+            return;
+          }
+          button.disabled = true;
+          const previous = button.textContent;
+          button.textContent = "Atualizando...";
+          try {
+            await patch(button.dataset.id, button.dataset.phase, button.dataset.status);
+            setTimeout(render, 100);
+          } catch (error) {
+            console.error(error);
+            alert("Não foi possível avançar o pedido.");
+            button.disabled = false;
+            button.textContent = previous;
+          }
+        };
+      });
+    } catch (error) {
+      console.error("Falha ao carregar arte e preparação", error);
+    }
+  }
+
+  document.addEventListener("click", (event) => {
+    const finished = event.target.closest('.status-action[data-status="finalizado"]');
+    if (finished) setTimeout(() => patch(finished.dataset.id, "embalado", "finalizado").catch((error) => console.error("Falha ao embalar pedido", error)), 250);
+    if (event.target.closest('.nav-item[data-view="producao"]')) setTimeout(render, 250);
+  }, true);
+
+  const observer = new MutationObserver(() => setTimeout(render, 80));
+  document.addEventListener("DOMContentLoaded", () => {
+    const view = document.getElementById("view-producao");
+    if (view) observer.observe(view, { childList: true, subtree: false });
+    setInterval(render, 5000);
+  });
+  window.KodaProductionFlow = { refresh: render, advance: patch };
 })();
