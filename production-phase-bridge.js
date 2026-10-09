@@ -96,6 +96,7 @@
   }
 
   async function render() {
+    if (window.KodaOperationsPro) return;
     const view = document.getElementById("view-producao");
     if (!view?.classList.contains("active")) return;
     const firstColumn = view.querySelector(".production-columns")?.children?.[0];
