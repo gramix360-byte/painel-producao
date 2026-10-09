@@ -396,7 +396,7 @@ function bindStatusActions() {
         order.started_at = nowIso();
       }
       if (order.status === "finalizado") {
-        order.phase = "finalizado";
+        order.phase = "embalado";
         order.finished_at = nowIso();
       }
       await saveLocal(order, true);
