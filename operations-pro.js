@@ -46,7 +46,11 @@
     const old = $(".production-columns", host);
     (old || host.firstElementChild)?.insertAdjacentElement("beforebegin", toolbar);
     if (!toolbar.parentElement) host.prepend(toolbar);
-    toolbar.querySelector("[data-create-production-card]").onclick = openCreateCard;
+    const createButton = toolbar.querySelector("[data-create-production-card]");
+    createButton.onclick = openCreateCard;
+    window.PPRoleAccess?.getProfile?.().then((profile) => {
+      if (profile?.role && !["admin", "vendas"].includes(profile.role)) createButton.hidden = true;
+    }).catch(() => {});
     return toolbar;
   }
 
