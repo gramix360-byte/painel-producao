@@ -11,7 +11,7 @@
     { key: "producao", label: "Em produção", phases: ["em_producao"] },
     { key: "embalado", label: "Embalado", phases: ["embalado"] },
   ];
-  let orders = [], loading = false, modalOrder = null, renderTimer, createOptions = null;
+  let orders = [], loading = false, modalOrder = null, renderTimer;
 
   async function headers() {
     const session = await window.PPAuth?.getSession?.();
@@ -35,23 +35,6 @@
   }
   async function rpc(name, body) {
     return request(`rpc/${name}`, { method: "POST", body: JSON.stringify(body) });
-  }
-
-  function ensureToolbar(host) {
-    let toolbar = $(".operations-pro-toolbar", host);
-    if (toolbar) return toolbar;
-    toolbar = document.createElement("div");
-    toolbar.className = "operations-pro-toolbar";
-    toolbar.innerHTML = `<div><h2>Produção</h2><p>Acompanhe os pedidos e crie tarefas avulsas para a equipe.</p></div><button class="button primary" type="button" data-create-production-card>+ Novo card</button>`;
-    const old = $(".production-columns", host);
-    (old || host.firstElementChild)?.insertAdjacentElement("beforebegin", toolbar);
-    if (!toolbar.parentElement) host.prepend(toolbar);
-    const createButton = toolbar.querySelector("[data-create-production-card]");
-    createButton.onclick = openCreateCard;
-    window.PPRoleAccess?.getProfile?.().then((profile) => {
-      if (profile?.role && !["admin", "vendas"].includes(profile.role)) createButton.hidden = true;
-    }).catch(() => {});
-    return toolbar;
   }
 
   function actionFor(order) {
@@ -82,7 +65,6 @@
   function renderBoard() {
     const host = $("#view-producao");
     if (!host?.classList.contains("active")) return;
-    ensureToolbar(host);
     let board = $(".operations-pro-board", host);
     if (!board) {
       const old = $(".production-columns", host);
@@ -95,124 +77,6 @@
       return `<section class="ops-column" data-column="${column.key}"><header><h3>${column.label}</h3><strong>${rows.length}</strong></header><div class="ops-column-list">${rows.length ? rows.map(card).join("") : '<div class="ops-empty">Nenhum pedido</div>'}</div></section>`;
     }).join("");
     board.onclick = handleBoardClick;
-  }
-
-  async function loadCreateOptions() {
-    if (createOptions) return createOptions;
-    const [customers, products] = await Promise.all([
-      request("customers?select=id,name&active=eq.true&deleted_at=is.null&order=name.asc&limit=500"),
-      request("products?select=id,name,sku,sale_price,cost_price&active=eq.true&deleted_at=is.null&order=name.asc&limit=500"),
-    ]);
-    createOptions = { customers, products };
-    return createOptions;
-  }
-  function ensureCreateModal() {
-    let backdrop = $("#ops-create-card-modal");
-    if (backdrop) return backdrop;
-    backdrop = document.createElement("div");
-    backdrop.id = "ops-create-card-modal";
-    backdrop.className = "ops-modal-backdrop ops-create-backdrop";
-    backdrop.innerHTML = '<div class="ops-modal ops-create-modal"><div id="ops-create-card-body"></div></div>';
-    backdrop.onclick = (event) => { if (event.target === backdrop || event.target.closest("[data-create-close]")) backdrop.classList.remove("open"); };
-    document.body.appendChild(backdrop);
-    return backdrop;
-  }
-  async function openCreateCard() {
-    const backdrop = ensureCreateModal(), body = $("#ops-create-card-body", backdrop);
-    backdrop.classList.add("open");
-    body.innerHTML = '<div class="ops-modal-loading">Preparando novo card...</div>';
-    try {
-      const { customers, products } = await loadCreateOptions();
-      body.innerHTML = `<button data-create-close class="ops-close" aria-label="Fechar">×</button>
-        <div class="ops-modal-head"><div><small>Produção</small><h2>Novo card</h2><p>Crie uma tarefa de produção mesmo sem passar pelo orçamento.</p></div></div>
-        <form id="ops-create-card-form" class="ops-create-form">
-          <label class="ops-field ops-span-2"><span>Cliente *</span><input name="customer_name" list="ops-customer-list" required maxlength="160" placeholder="Nome do cliente"><datalist id="ops-customer-list">${customers.map((c) => `<option value="${esc(c.name)}"></option>`).join("")}</datalist></label>
-          <label class="ops-field ops-span-2"><span>Produto ou serviço *</span><input name="product_name" list="ops-product-list" required maxlength="240" placeholder="Ex.: 100 chaveiros personalizados"><datalist id="ops-product-list">${products.map((p) => `<option value="${esc(p.name)}">${esc(p.sku || "")}</option>`).join("")}</datalist></label>
-          <label class="ops-field"><span>Quantidade *</span><input name="quantity" type="number" min="1" step="1" value="1" required></label>
-          <label class="ops-field"><span>Preço unitário</span><input name="unit_price" type="number" min="0" step="0.01" value="0"></label>
-          <label class="ops-field"><span>Prazo</span><input name="due_date" type="date"></label>
-          <label class="ops-field"><span>Prioridade</span><select name="priority"><option value="normal">Normal</option><option value="urgente">Urgente</option></select></label>
-          <label class="ops-field ops-span-2"><span>Etapa inicial</span><select name="phase"><option value="arte_em_criacao">Criando arte</option><option value="aguardando_aprovacao">Aguardando aprovação</option><option value="arte_aprovada">Arte aprovada</option><option value="em_producao">Em produção</option></select></label>
-          <label class="ops-field ops-span-2"><span>Personalização</span><input name="personalization" maxlength="500" placeholder="Ex.: Logo branca gravada a laser"></label>
-          <label class="ops-field ops-span-2"><span>Observações</span><textarea name="notes" rows="3" maxlength="2000" placeholder="Informações importantes para a equipe"></textarea></label>
-          <div class="ops-create-actions ops-span-2"><button class="button secondary" type="button" data-create-close>Cancelar</button><button class="button primary" type="submit">Criar card</button></div>
-        </form>`;
-      const form = $("#ops-create-card-form", body);
-      const productInput = form.elements.product_name;
-      productInput.addEventListener("change", () => {
-        const product = products.find((item) => item.name.trim().toLowerCase() === productInput.value.trim().toLowerCase());
-        if (product && !Number(form.elements.unit_price.value)) form.elements.unit_price.value = Number(product.sale_price || 0).toFixed(2);
-      });
-      form.onsubmit = (event) => createCard(event, products, backdrop);
-      form.elements.customer_name.focus();
-    } catch (error) {
-      console.error(error);
-      body.innerHTML = `<button data-create-close class="ops-close">×</button><div class="ops-load-error">Não foi possível preparar o cadastro do card.</div>`;
-    }
-  }
-  async function createCard(event, products, backdrop) {
-    event.preventDefault();
-    const form = event.currentTarget, submit = form.querySelector('[type="submit"]');
-    const values = Object.fromEntries(new FormData(form).entries());
-    const quantity = Number(values.quantity), unitPrice = Number(values.unit_price || 0);
-    if (!values.customer_name.trim() || !values.product_name.trim() || !Number.isInteger(quantity) || quantity < 1 || unitPrice < 0) return alert("Preencha cliente, produto e quantidade corretamente.");
-    const product = products.find((item) => item.name.trim().toLowerCase() === values.product_name.trim().toLowerCase());
-    const phase = values.phase || "arte_em_criacao";
-    submit.disabled = true;
-    submit.textContent = "Criando...";
-    let createdOrder = null;
-    try {
-      const orderNumber = await rpc("next_order_number", {});
-      const orderRows = await request("orders", {
-        method: "POST",
-        headers: { Prefer: "return=representation" },
-        body: JSON.stringify({
-          order_number: orderNumber,
-          customer_name: values.customer_name.trim(),
-          due_date: values.due_date || null,
-          priority: values.priority || "normal",
-          notes: values.notes.trim(),
-          status: phase === "em_producao" ? "em_producao" : "aguardando",
-          phase,
-          artwork_status: phase === "aguardando_aprovacao" ? "pending" : phase === "arte_aprovada" || phase === "em_producao" ? "approved" : "not_sent",
-          started_at: phase === "em_producao" ? new Date().toISOString() : null,
-          total_amount: quantity * unitPrice,
-          sales_channel: "venda_externa",
-          payment_status: "pendente",
-          payment_plan: "split_50_50",
-        }),
-      });
-      createdOrder = orderRows?.[0];
-      if (!createdOrder?.id) throw new Error("O pedido não foi criado.");
-      const unitCost = Number(product?.cost_price || 0);
-      await request("order_items", {
-        method: "POST",
-        headers: { Prefer: "return=minimal" },
-        body: JSON.stringify({
-          order_id: createdOrder.id,
-          product_id: product?.id || null,
-          product_name: values.product_name.trim(),
-          quantity,
-          personalization: values.personalization.trim(),
-          unit_price: unitPrice,
-          line_total: quantity * unitPrice,
-          unit_cost: unitCost,
-          cost_subtotal: quantity * unitCost,
-        }),
-      });
-      backdrop.classList.remove("open");
-      await load();
-      window.KodaAlerts?.refresh?.();
-      window.KodaNotifications?.refresh?.();
-      alert(`Card do pedido #${orderNumber} criado com sucesso.`);
-    } catch (error) {
-      console.error(error);
-      if (createdOrder?.id) request(`orders?id=eq.${encodeURIComponent(createdOrder.id)}`, { method: "DELETE", headers: { Prefer: "return=minimal" } }).catch(console.warn);
-      alert(`Não foi possível criar o card.\n${error.message || ""}`);
-    } finally {
-      submit.disabled = false;
-      submit.textContent = "Criar card";
-    }
   }
   async function load() {
     if (loading) return;
