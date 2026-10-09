@@ -253,9 +253,11 @@ async function updateConnection() {
 }
 function orderCard(order, pending = false) {
   const action =
-    order.status === "em_producao"
-      ? `<button class="button success status-action" data-id="${order.id}" data-status="finalizado">Embalado e etiquetado — Finalizar</button>`
-      : "";
+    order.status === "aguardando"
+      ? `<button class="button warning status-action" data-id="${order.id}" data-status="em_producao">Iniciar produção</button>`
+      : order.status === "em_producao"
+        ? `<button class="button success status-action" data-id="${order.id}" data-status="finalizado">Embalado e etiquetado — Finalizar</button>`
+        : "";
   return `<article class="order-card ${order.priority === "urgente" ? "urgent" : ""} ${order.status === "em_producao" ? "in-production" : ""}"><div class="order-card-head"><div><div class="order-number">#${escapeHtml(order.order_number)}</div><div class="customer">${escapeHtml(order.customer_name)}</div></div><div class="meta"><span class="badge ${order.priority}">${order.priority === "urgente" ? "URGENTE" : "Normal"}</span>${pending ? '<span class="badge pending">Pendente de sync</span>' : ""}<div>Prazo: ${formatDate(order.due_date)}</div></div></div><ul class="order-items">${order.items.map((i) => `<li><span class="qty">${i.quantity}</span><div><div class="item-name">${escapeHtml(i.product_name)}</div>${i.personalization ? `<div class="personalization">${escapeHtml(i.personalization)}</div>` : ""}</div></li>`).join("")}</ul>${order.notes ? `<div class="order-notes"><strong>Obs.:</strong> ${escapeHtml(order.notes)}</div>` : ""}${action ? `<div class="order-actions">${action}</div>` : ""}</article>`;
 }
 async function renderDashboard(orders, pending) {
@@ -279,15 +281,10 @@ async function renderProduction(orders, pending) {
     if (a.priority !== b.priority) return a.priority === "urgente" ? -1 : 1;
     return (a.due_date || "9999").localeCompare(b.due_date || "9999");
   };
-  const doing = orders
-    .filter(
-      (o) =>
-        (o.phase || "pedido_recebido") === "em_producao" &&
-        o.status === "em_producao",
-    )
-    .sort(sort);
+  const waiting = orders.filter((o) => o.status === "aguardando").sort(sort);
+  const doing = orders.filter((o) => o.status === "em_producao").sort(sort);
   $("#view-producao").innerHTML =
-    `<div class="production-columns"><div></div><div><div class="column-title production"><h2>Em produção</h2><strong>${doing.length}</strong></div>${doing.length ? doing.map((o) => orderCard(o, pending.has(o.id))).join("") : '<div class="empty">Nenhum pedido em produção.</div>'}</div></div>`;
+    `<div class="production-columns"><div><div class="column-title"><h2>Aguardando</h2><strong>${waiting.length}</strong></div>${waiting.length ? waiting.map((o) => orderCard(o, pending.has(o.id))).join("") : '<div class="empty">Nenhum pedido aguardando.</div>'}</div><div><div class="column-title production"><h2>Em produção</h2><strong>${doing.length}</strong></div>${doing.length ? doing.map((o) => orderCard(o, pending.has(o.id))).join("") : '<div class="empty">Nenhum pedido em produção.</div>'}</div></div>`;
   bindStatusActions();
 }
 async function renderOrders(orders, pending) {
