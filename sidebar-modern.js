@@ -25,8 +25,10 @@
     inicio: "⌂",
     vendas: "▤",
     produtos: "◇",
+    compras: "▱",
     custos: "R$",
     producao: "⚙",
+    expedicao: "➜",
     financeiro: "▥",
     marketing: "◁",
     canais: "↻",
@@ -129,18 +131,20 @@
     side.insertBefore(search, nav);
     makeGroup(nav, "inicio", "Visão geral", [map.dashboard], { single: true });
     makeGroup(nav, "vendas", "Vendas", [
-      map.quotes,
-      map.pedidos,
       map.customers,
+      map.quotes,
       map.novo,
+      map.pedidos,
     ]);
-    makeGroup(nav, "produtos", "Produtos", [map.products, map.purchases]);
-    makeGroup(nav, "custos", "Custo", [map.calculator, map.material, map.cost]);
     makeGroup(nav, "producao", "Produção", [map.producao], { single: true });
     makeGroup(nav, "expedicao", "Expedição", [map.shipping], { single: true });
+    makeGroup(nav, "produtos", "Produtos e estoque", [map.products], { single: true });
+    makeGroup(nav, "compras", "Compras", [map.purchases], { single: true });
+    makeGroup(nav, "custos", "Custos", [map.calculator, map.material, map.cost]);
     makeGroup(nav, "financeiro", "Financeiro", [map.finance, map.reports]);
-    makeGroup(nav, "canais", "Integrações", [map.integrations]);
-    makeGroup(nav, "admin", "Mais", [map.marketing, map.settings]);
+    makeGroup(nav, "marketing", "Marketing", [map.marketing], { single: true });
+    makeGroup(nav, "canais", "Integrações", [map.integrations], { single: true });
+    makeGroup(nav, "admin", "Mais", [map.sync, map.settings]);
     const footer = document.createElement("div");
     footer.className = "sidebar-footer";
     footer.innerHTML =
