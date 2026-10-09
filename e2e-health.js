@@ -1,1 +1,85 @@
-(()=>{async function h(){const s=await PPAuth.getSession();return{apikey:PPAuth.key,Authorization:`Bearer ${s.access_token}`}}async function req(path){const r=await fetch(`${PPAuth.url}/rest/v1/${path}`,{headers:await h()});return{ok:r.ok,data:r.ok?await r.json():[],error:r.ok?'':await r.text()}}async function run(){const checks=[];const add=(name,ok,detail)=>checks.push({name,ok,detail});try{const [o,p,q,c,f,pu]=await Promise.all([req('orders?select=id,status,phase,stock_applied,payment_status,deleted_at&deleted_at=is.null&limit=2000'),req('products?select=id,name,stock,min_stock,deleted_at&deleted_at=is.null&limit=2000'),req('quotes?select=id,status,deleted_at&deleted_at=is.null&limit=2000'),req('customers?select=id&deleted_at=is.null&limit=1'),req('cash_transactions?select=id,status,deleted_at&deleted_at=is.null&limit=2000'),req('purchases?select=id,status,finance_id,product_id&limit=2000')]);add('Clientes → Orçamentos',c.ok&&q.ok,c.ok&&q.ok?'Consultas operacionais':'Falha de acesso');add('Orçamentos → Pedidos',q.ok&&o.ok,'Conversão protegida por RPC');const inconsistent=o.data.filter(x=>x.status==='finalizado'&&x.phase!=='finalizado');add('Produção → Finalização',o.ok&&!inconsistent.length,inconsistent.length?`${inconsistent.length} pedido(s) inconsistente(s)`:'Fases consistentes');const noStock=o.data.filter(x=>x.status==='finalizado'&&!x.stock_applied);add('Pedido → Estoque',o.ok&&!noStock.length,noStock.length?`${noStock.length} finalizado(s) sem baixa confirmada`:'Baixa idempotente ativa');const badStock=p.data.filter(x=>Number(x.stock)<0);add('Integridade do estoque',p.ok&&!badStock.length,badStock.length?`${badStock.length} produto(s) negativo(s)`:'Sem estoque negativo');const badPurchase=pu.data.filter(x=>x.status==='aguardando'&&!x.finance_id);add('Compras → Financeiro',pu.ok&&f.ok&&!badPurchase.length,badPurchase.length?`${badPurchase.length} compra(s) sem conta vinculada`:'Vínculos consistentes');add('Financeiro',f.ok,f.ok?'Consulta operacional':'Acesso indisponível para este perfil');}catch(e){add('Fluxo geral',false,e.message)}return checks}window.KodaHealth={run,async show(){const a=await run(),bad=a.filter(x=>!x.ok);alert(`${bad.length?'⚠️':'✓'} Diagnóstico KODA\n\n${a.map(x=>`${x.ok?'✓':'⚠'} ${x.name}: ${x.detail}`).join('\n')}\n\n${bad.length?`${bad.length} ponto(s) precisam de atenção.`:'Fluxo principal consistente.'}`)}};})();
+(() => {
+  async function headers() {
+    const session = await PPAuth.getSession();
+    return { apikey: PPAuth.key, Authorization: `Bearer ${session.access_token}` };
+  }
+
+  async function request(path) {
+    const response = await fetch(`${PPAuth.url}/rest/v1/${path}`, { headers: await headers() });
+    return {
+      ok: response.ok,
+      data: response.ok ? await response.json() : [],
+      error: response.ok ? "" : await response.text(),
+    };
+  }
+
+  async function run() {
+    const checks = [];
+    const add = (name, ok, detail) => checks.push({ name, ok, detail });
+
+    try {
+      const [orders, products, quotes, customers, finance, purchases] = await Promise.all([
+        request("orders?select=id,status,phase,stock_applied,payment_status,deleted_at&deleted_at=is.null&limit=2000"),
+        request("products?select=id,name,stock,min_stock,deleted_at&deleted_at=is.null&limit=2000"),
+        request("quotes?select=id,status,deleted_at&deleted_at=is.null&limit=2000"),
+        request("customers?select=id&deleted_at=is.null&limit=1"),
+        request("cash_transactions?select=id,status,deleted_at&deleted_at=is.null&limit=2000"),
+        request("purchases?select=id,status,finance_id,product_id&limit=2000"),
+      ]);
+
+      add("Clientes → Orçamentos", customers.ok && quotes.ok, customers.ok && quotes.ok ? "Consultas operacionais" : "Falha de acesso");
+      add("Orçamentos → Pedidos", quotes.ok && orders.ok, "Conversão protegida por transação");
+
+      const inconsistent = orders.data.filter(
+        (item) => item.status === "finalizado" && !["embalado", "expedicao", "entregue", "finalizado"].includes(item.phase),
+      );
+      add(
+        "Produção → Finalização",
+        orders.ok && !inconsistent.length,
+        inconsistent.length ? `${inconsistent.length} pedido(s) inconsistente(s)` : "Fluxo consistente",
+      );
+
+      const missingStock = orders.data.filter((item) => item.status === "finalizado" && !item.stock_applied);
+      add(
+        "Pedido → Estoque",
+        orders.ok && !missingStock.length,
+        missingStock.length ? `${missingStock.length} finalizado(s) sem baixa confirmada` : "Baixa idempotente ativa",
+      );
+
+      const negativeStock = products.data.filter((item) => Number(item.stock) < 0);
+      add(
+        "Integridade do estoque",
+        products.ok && !negativeStock.length,
+        negativeStock.length ? `${negativeStock.length} produto(s) com estoque negativo` : "Sem estoque negativo",
+      );
+
+      const purchasesWithoutFinance = purchases.data.filter(
+        (item) => !["cancelado", "rascunho"].includes(item.status) && !item.finance_id,
+      );
+      add(
+        "Compras → Financeiro",
+        purchases.ok && finance.ok && !purchasesWithoutFinance.length,
+        purchasesWithoutFinance.length
+          ? `${purchasesWithoutFinance.length} compra(s) sem conta vinculada`
+          : "Vínculos consistentes",
+      );
+      add("Financeiro", finance.ok, finance.ok ? "Consulta operacional" : "Acesso indisponível para este perfil");
+    } catch (error) {
+      add("Fluxo geral", false, window.BrindesOnErrors?.message(error, "Falha inesperada no diagnóstico.") || "Falha inesperada no diagnóstico.");
+    }
+    return checks;
+  }
+
+  window.KodaHealth = {
+    run,
+    async show() {
+      const checks = await run();
+      const failed = checks.filter((item) => !item.ok);
+      alert(
+        `${failed.length ? "⚠️" : "✓"} Diagnóstico Brindes On\n\n${checks
+          .map((item) => `${item.ok ? "✓" : "⚠"} ${item.name}: ${item.detail}`)
+          .join("\n")}\n\n${failed.length ? `${failed.length} ponto(s) precisam de atenção.` : "Fluxo principal consistente."}`,
+      );
+    },
+  };
+})();
