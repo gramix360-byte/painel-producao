@@ -1,14 +1,12 @@
 (()=>{
   const PHASES=[
     ['pedido_recebido','Pedido recebido'],
-    ['aguardando_arte','Aguardando arte'],
-    ['arte_em_criacao','Arte em criação'],
+    ['arte_em_criacao','Criando arte'],
     ['aguardando_aprovacao','Aguardando aprovação'],
     ['arte_aprovada','Arte aprovada'],
     ['em_producao','Em produção'],
-    ['finalizado','Finalizado'],
-    ['embalagem','Embalagem'],
-    ['pronto_entrega','Pronto p/ entrega'],
+    ['embalado','Embalado'],
+    ['expedicao','Enviado'],
     ['entregue','Entregue']
   ];
   const phaseMap=Object.fromEntries(PHASES);
@@ -32,7 +30,7 @@
 
   function statusForPhase(phase){
     if(phase==='em_producao') return 'em_producao';
-    if(['finalizado','embalagem','pronto_entrega','entregue'].includes(phase)) return 'finalizado';
+    if(['embalado','expedicao','entregue'].includes(phase)) return 'finalizado';
     return 'aguardando';
   }
 
