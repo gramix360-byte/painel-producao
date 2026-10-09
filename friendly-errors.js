@@ -22,6 +22,14 @@
       return "Sem conexão com o servidor. Verifique a internet e tente novamente.";
     if (text.includes("foreign key") || text.includes("23503"))
       return "Este item está vinculado a outro cadastro e não pode ser alterado dessa forma.";
+    if (text.includes("family name") && text.includes("60"))
+      return "O nome da família do produto deve ter no máximo 60 caracteres.";
+    if (text.includes("validation_error") || text.includes("validation error"))
+      return "O Mercado Livre recusou algum dado do anúncio. Revise título, categoria, preço, imagens e características.";
+    if (text.includes("mercado livre") && (text.includes("token") || text.includes("unauthorized")))
+      return "A conexão com o Mercado Livre expirou. Reconecte a conta e tente novamente.";
+    if (text.includes("image") || text.includes("imagem"))
+      return "Não foi possível processar a imagem. Use JPG, PNG ou WebP com até 5 MB.";
     return fallback;
   }
 

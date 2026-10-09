@@ -20,7 +20,7 @@
     try {
       const [orders, products, quotes, customers, finance, purchases] = await Promise.all([
         request("orders?select=id,status,phase,stock_applied,payment_status,deleted_at&deleted_at=is.null&limit=2000"),
-        request("products?select=id,name,stock,min_stock,deleted_at&deleted_at=is.null&limit=2000"),
+        request("products?select=id,name,stock,low_stock_threshold,deleted_at&deleted_at=is.null&limit=2000"),
         request("quotes?select=id,status,deleted_at&deleted_at=is.null&limit=2000"),
         request("customers?select=id&deleted_at=is.null&limit=1"),
         request("cash_transactions?select=id,status,deleted_at&deleted_at=is.null&limit=2000"),
