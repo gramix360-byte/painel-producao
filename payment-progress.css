@@ -1,0 +1,6 @@
+.payment-progress-select{width:auto;min-width:112px;min-height:0;padding:5px 25px 5px 9px;border:0;border-radius:999px;font-size:10px;font-weight:700;cursor:pointer;box-shadow:none}
+.payment-progress-select.pendente{background:#fff4dc;color:#8d5d0c}
+.payment-progress-select.parcial{background:#eaf2ff;color:#315f9b}
+.payment-progress-select.pago{background:#e7f7ef;color:#13764e}
+.payment-progress-select.saving{opacity:.55;cursor:wait}
+@media(max-width:760px){.payment-progress-select{font-size:12px;padding:8px 30px 8px 11px}}
